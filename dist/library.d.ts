@@ -1,1 +1,1 @@
-export default function sampleLibrary(): string;
+export default function fetchAndRenderData(): void;
