@@ -1,10 +1,10 @@
 {
   "name": "@airjam/table-view",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0",
   "author": "airjamadmin",
   "description": "Table view component library for AirJam",
-  "homepage": "https://my-templates.github.io/TypeScript-Library/",
+  "homepage": "https://github.com/airjam-co/table-view/",
   "keywords": [
     "TypeScript",
     "JavaScript",
@@ -22,10 +22,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/My-Templates/TypeScript-Library.git"
+    "url": "git+https://github.com/airjam-co/table-view.git"
   },
   "bugs": {
-    "url": "https://github.com/My-Templates/TypeScript-Library/issues"
+    "url": "https://github.com/airjam-co/table-view/issues"
   },
   "scripts": {
     "build": "rollup -c rollup.config.ts",
