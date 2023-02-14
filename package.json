@@ -1,6 +1,6 @@
 {
   "name": "@airjam/table-view",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "Apache-2.0",
   "author": "airjamadmin",
   "description": "Table view component library for AirJam",
@@ -12,7 +12,7 @@
     "typescript-library",
     "javascript-library"
   ],
-  "umdName": "sampleLibrary",
+  "umdName": "tableView",
   "libraryFile": "library",
   "main": "dist/library.js",
   "module": "dist/library.es.js",
@@ -57,6 +57,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@airjam/types": "^0.0.3",
     "chart.js": "^4.2.0"
   }
 }

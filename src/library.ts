@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
 import { ChartType } from "chart.js";
-import { dataField, dataResponse, DataSourceFieldType, PaginationStyle, TableViewStyle } from './include/server_responses';
+import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, TableViewStyle } from "@airjam/types";
 import { template_cache, style_cache } from './include/template_cache';
 
 // const SERVING_DATA_URL: string = "http://airjam.co/s/data?id=";
@@ -20,7 +20,7 @@ export default function fetchAndRenderData() {
       const page: number = 1;
       currentPage[viewId] = 1;
       fetch(SERVING_DATA_URL + viewId + "&page=" + page).then(result => {
-        result.json().then((fetchedData: dataResponse) => {
+        result.json().then((fetchedData: tableViewResponse) => {
           const template = getTemplate(fetchedData);
           const style = getStyle(fetchedData);
           if (style.containerClassNames && Array.isArray(style.containerClassNames)) view.className += " " + style.containerClassNames.join(" ");
@@ -51,7 +51,7 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
   if (window && window.document) {
     currentPage[viewId] = page;
     fetch(SERVING_DATA_URL + viewId + "&page=" + page).then(result => {
-      result.json().then((fetchedData: dataResponse) => {
+      result.json().then((fetchedData: tableViewResponse) => {
         const template = getTemplate(fetchedData);
         const style = getStyle(fetchedData);
         view.innerHTML = ""; // clear out just the content and reload
@@ -74,7 +74,7 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
   }
 }
 
-function renderCollectionToView(viewId: string, view: Element, fetchedData: dataResponse, template: any, style: any) {
+function renderCollectionToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
   if (!template.templateFields || !template.templateContent || !fetchedData.templateFields) {
     console.log(viewId + " will not be rendered because it does not have required template attributes.");
     return;
@@ -102,7 +102,7 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: data
     }
 }
 
-function renderPagination(viewId: string, view: Element, fetchedData: dataResponse) {
+function renderPagination(viewId: string, view: Element, fetchedData: tableViewResponse) {
   const pagingSection = window.document.createElement("div");
   pagingSection.className = "pagination";
   view.appendChild(pagingSection);
@@ -142,7 +142,7 @@ function makePageLink(viewId: string, view: Element, pageNumber: number, linkTex
   }
 }
 
-function renderTableToView(viewId: string, view: Element, fetchedData: dataResponse, template: any, style: any) {
+function renderTableToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
   let caption: string = "";
   if (fetchedData.templateProperties && fetchedData.templateProperties.caption) {
     caption = fetchedData.templateProperties.caption;
@@ -199,14 +199,14 @@ function renderData(data: dataField): HTMLElement {
   return span;
 }
 
-function renderGraphToView(viewId: string, view: Element, fetchedData: dataResponse, template: any, style: any) {
+function renderGraphToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
   if (!template.compatibleDisplayType || !Array.isArray(template.compatibleDisplayType)) return;
   if (template.compatibleDisplayType.filter((t: string) => t === "graph")) {
     renderChartToView(viewId, view, fetchedData, template, style);
   }
 }
 
-function renderChartToView(viewId: string, view: Element, fetchedData: dataResponse, template: any, style: any) {
+function renderChartToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
   // initiate template and style data
   let chartType : ChartType = "bar";
   if (template.componentProperties && template.componentProperties.chartType) chartType = template.componentProperties.chartType;
@@ -266,7 +266,7 @@ function renderChartToView(viewId: string, view: Element, fetchedData: dataRespo
   }
 }
 
-function dataToTableMatrix(fetchedData: dataResponse): dataField[][] {
+function dataToTableMatrix(fetchedData: tableViewResponse): dataField[][] {
   const dataRows: dataField[][] = [];
   if (fetchedData.data && fetchedData.data.length) {
     const keys = Object.keys(fetchedData.data[0]);
@@ -297,7 +297,7 @@ function rotateArray(arr: any[], reverse: boolean): any[] {
   return arr;
 }
 
-function getTemplate(fetchedData: dataResponse): any {
+function getTemplate(fetchedData: tableViewResponse): any {
   const cached_entry = Object.entries(template_cache).filter(value => value[0] === fetchedData.templateId);
   if (cached_entry && cached_entry[0] && cached_entry[0].length > 1) {
     return cached_entry[0][1];
@@ -305,7 +305,7 @@ function getTemplate(fetchedData: dataResponse): any {
   // return the template data response returned itself.
 }
 
-function getStyle(fetchedData: dataResponse): any {
+function getStyle(fetchedData: tableViewResponse): any {
   const cached_entry = Object.entries(style_cache).filter(value => value[0] === fetchedData.styleId);
   if (cached_entry && cached_entry[0] && cached_entry[0].length > 1) {
     return cached_entry[0][1];

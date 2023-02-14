@@ -14822,6 +14822,7 @@ var style_cache = {
     }
 };
 
+// const SERVING_DATA_URL: string = "http://airjam.co/s/data?id=";
 var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
 var PAGINATION_SHOW_SIZE = 7;
 var currentPage = {}; // global variable that keeps track of current page.

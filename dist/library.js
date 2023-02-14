@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.sampleLibrary = factory());
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.tableView = factory());
 })(this, (function () { 'use strict';
 
   /*!
@@ -14828,6 +14828,7 @@
       }
   };
 
+  // const SERVING_DATA_URL: string = "http://airjam.co/s/data?id=";
   var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
   var PAGINATION_SHOW_SIZE = 7;
   var currentPage = {}; // global variable that keeps track of current page.
