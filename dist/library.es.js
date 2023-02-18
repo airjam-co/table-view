@@ -14507,7 +14507,9 @@ var ViewType;
 (function (ViewType) {
     ViewType["Board"] = "view_board";
     ViewType["List"] = "view_list";
-    ViewType["Feed"] = "view_feed";
+    ViewType["Gallery"] = "view_gallery";
+    ViewType["Graph"] = "view_graph";
+    ViewType["Table"] = "view_table";
 })(ViewType || (ViewType = {}));
 var PaginationStyle;
 (function (PaginationStyle) {
@@ -14515,13 +14517,6 @@ var PaginationStyle;
     PaginationStyle["InfiniteScroll"] = "pagination_infinite";
     PaginationStyle["NoPagination"] = "pagination_none";
 })(PaginationStyle || (PaginationStyle = {}));
-var TableViewStyle;
-(function (TableViewStyle) {
-    TableViewStyle["List"] = "table_view_list";
-    TableViewStyle["Gallery"] = "table_view_gallery";
-    TableViewStyle["Graph"] = "table_view_graph";
-    TableViewStyle["Table"] = "table_view_table";
-})(TableViewStyle || (TableViewStyle = {}));
 var DataSourceFieldType;
 (function (DataSourceFieldType) {
     DataSourceFieldType["Text"] = "text";
@@ -14532,14 +14527,19 @@ var DataSourceFieldType;
     DataSourceFieldType["Link"] = "link";
     DataSourceFieldType["Email"] = "email";
 })(DataSourceFieldType || (DataSourceFieldType = {}));
-
+var SortBy;
+(function (SortBy) {
+    SortBy["RECENT"] = "recent";
+    SortBy["OLDEST"] = "oldest";
+})(SortBy || (SortBy = {}));
 var template_cache = {
     "card_list": {
+        _id: "",
         shortId: "card_list",
-        compatibleWith: "list",
-        compatibleDisplayType: ["list", "gallery"],
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.List, ViewType.Gallery],
         name: "Card List",
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "card list.",
@@ -14556,7 +14556,7 @@ var template_cache = {
             link: {
                 name: "Link",
                 description: "Link to open",
-                compatibleTypes: ["link"]
+                compatibleTypes: [DataSourceFieldType.Link]
             },
             linkText: {
                 name: "Link Text",
@@ -14566,72 +14566,78 @@ var template_cache = {
             thumbnail: {
                 name: "Thumbnail image",
                 description: "thumbnail image",
-                compatibleTypes: ["link"],
+                compatibleTypes: [DataSourceFieldType.Link],
             },
             description: {
                 name: "Description",
-                descriptions: "descriptions",
+                description: "descriptions",
                 compatibleTypes: [],
             }
         },
         componentProperties: {}
     },
     "standard_table": {
+        _id: "",
         shortId: "standard_table",
-        compatibleWith: "table_view",
-        compatibleDisplayType: ["table"],
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Table],
         name: "Standard Table",
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "table, as shown on the sheet itself.",
         visibility: "PUBLIC",
         pages: ["LIST"],
+        templateContent: "",
+        templateFields: {},
         properties: {
             caption: {
                 name: "Caption",
                 description: "Use component's title as a caption",
                 default: false,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             striped: {
                 name: "Striped rows",
                 description: "Do row colors alternate",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
         },
         componentProperties: {}
     },
     "barchart": {
+        _id: "",
         shortId: "barchart",
-        compatibleWith: "table_view",
-        compatibleDisplayType: ["graph"],
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Graph],
         name: "Bar Chart",
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "bar chart, rows must be horizontal and data in the second row to work.",
         visibility: "PUBLIC",
         pages: ["LIST"],
+        templateContent: "",
+        templateFields: {},
         properties: {
             useFirstColumnAsLabels: {
                 name: "First Column is Labels",
                 description: "Use first column as labels",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showLegends: {
                 name: "Show Legends",
                 description: "Show legends of labels in the graph",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showVertically: {
                 name: "ShowVertically",
                 description: "Display graph vertically, rather than horizontally",
                 default: false,
-                type: "Boolean"
+                type: "BOOLEAN"
             }
         },
         componentProperties: {
@@ -14639,34 +14645,37 @@ var template_cache = {
         }
     },
     "piechart": {
+        _id: "",
         shortId: "piechart",
-        compatibleWith: "table_view",
-        compatibleDisplayType: ["graph"],
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Graph],
         name: "Pie Chart",
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "pie chart, rows must be horizontal and data in the second row to work.",
         visibility: "PUBLIC",
         pages: ["LIST"],
+        templateContent: "",
+        templateFields: {},
         properties: {
             useFirstColumnAsLabels: {
                 name: "First Column is Labels",
                 description: "Use first column as labels",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showLegends: {
                 name: "Show Legends",
                 description: "Show legends of labels in the graph",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showVertically: {
                 name: "ShowVertically",
                 description: "Display graph vertically, rather than horizontally",
                 default: false,
-                type: "Boolean"
+                type: "BOOLEAN"
             }
         },
         componentProperties: {
@@ -14674,34 +14683,37 @@ var template_cache = {
         }
     },
     "linechart": {
+        _id: "",
         shortId: "linechart",
-        compatibleWith: "table_view",
-        compatibleDisplayType: ["graph"],
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Graph],
         name: "Line Chart",
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "line chart, rows must be horizontal and data in the second row to work.",
         visibility: "PUBLIC",
         pages: ["LIST"],
+        templateContent: "",
+        templateFields: {},
         properties: {
             useFirstColumnAsLabels: {
                 name: "First Column is Labels",
                 description: "Use first column as labels",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showLegends: {
                 name: "Show Legends",
                 description: "Show legends of labels in the graph",
                 default: true,
-                type: "Boolean"
+                type: "BOOLEAN"
             },
             showVertically: {
                 name: "ShowVertically",
                 description: "Display graph vertically, rather than horizontally",
                 default: false,
-                type: "Boolean"
+                type: "BOOLEAN"
             }
         },
         componentProperties: {
@@ -14711,10 +14723,11 @@ var template_cache = {
 };
 var style_cache = {
     "muted": {
+        _id: "",
         shortId: "muted",
         name: "Muted",
         compatibleWith: ["barchart"],
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "single green color theme set",
@@ -14726,27 +14739,28 @@ var style_cache = {
                 name: "Border Width",
                 description: "Border width",
                 default: 1,
-                type: "Number"
+                type: "NUMBER"
             },
             chartColors: {
                 name: "Chart Colors",
                 description: "Chart colors",
                 default: ["#D79922", "#EFE2BA", "#F13C20", "#4056A1", "#C5CBE3"],
-                type: "Color",
+                type: "COLOR",
                 multiple: true,
                 limit: 50
             }
         },
+        colorTheme: ["#D79922", "#EFE2BA", "#F13C20", "#4056A1", "#C5CBE3"],
         componentProperties: {
             borderWidth: 1,
-            chartColors: ["#D79922", "#EFE2BA", "#F13C20", "#4056A1", "#C5CBE3"],
         }
     },
     "earthy": {
+        _id: "",
         shortId: "earthy",
         name: "Earthy",
         compatibleWith: ["barchart"],
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "single green color theme set",
@@ -14758,27 +14772,28 @@ var style_cache = {
                 name: "Border Width",
                 description: "Border width",
                 default: 1,
-                type: "Number"
+                type: "NUMBER"
             },
             chartColors: {
                 name: "Chart Colors",
                 description: "Chart colors",
                 default: ["#E27D60", "#85CDCA", "#E8A87C", "#C38D9E", "#41B3A3"],
-                type: "Color",
+                type: "COLOR",
                 multiple: true,
                 limit: 50
             }
         },
+        colorTheme: ["#E27D60", "#85CDCA", "#E8A87C", "#C38D9E", "#41B3A3"],
         componentProperties: {
             borderWidth: 1,
-            chartColors: ["#E27D60", "#85CDCA", "#E8A87C", "#C38D9E", "#41B3A3"],
         }
     },
     "outback": {
+        _id: "",
         shortId: "outback",
         name: "Outback",
         compatibleWith: ["barchart"],
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "single green color theme set",
@@ -14790,33 +14805,35 @@ var style_cache = {
                 name: "Border Width",
                 description: "Border width",
                 default: 1,
-                type: "Number"
+                type: "NUMBER"
             },
             chartColors: {
                 name: "Chart Colors",
                 description: "Chart colors",
                 default: ["#8D8741", "#659DBD", "#DAAD86", "#BC986A", "#FBEEC1", "#C3C078", "#9978C3", "#82C378", "#DE67A0"],
-                type: "Color",
+                type: "COLOR",
                 multiple: true,
                 limit: 50
             }
         },
+        colorTheme: ["#8D8741", "#659DBD", "#DAAD86", "#BC986A", "#FBEEC1", "#C3C078", "#9978C3", "#82C378", "#DE67A0"],
         componentProperties: {
-            borderWidth: 1,
-            chartColors: ["#8D8741", "#659DBD", "#DAAD86", "#BC986A", "#FBEEC1", "#C3C078", "#9978C3", "#82C378", "#DE67A0"],
+            borderWidth: 1
         }
     },
     "concise_gallery": {
+        _id: "",
         shortId: "concise_gallery",
         name: "Concise gallery list",
         compatibleWith: ["card_list"],
-        owner_id: "",
+        ownerId: "",
         version: 1,
         previewImageUrls: [],
         description: "Concision is the key.",
         visibility: "PUBLIC",
         style: ".concise_gallery .container { display: inline-grid; padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 10px; margin: 5px; } .concise_gallery .container .title { font-size: 1.2 rem; font-weight: 600; }  .concise_gallery .container .image img { width: 100% } .concise_gallery .container .description { display: block } .concise_gallery .pagination a, .concise_gallery .pagination span { margin: 2px; padding: 3px; }",
         containerClassNames: ["concise_gallery"],
+        colorTheme: ["#ddd"],
         properties: {},
         componentProperties: {}
     }
@@ -14846,15 +14863,16 @@ function fetchAndRenderData() {
                     var styleElement = document.createElement('style');
                     styleElement.appendChild(window.document.createTextNode(style.style));
                     window.document.head.appendChild(styleElement);
-                    switch (fetchedData.viewStyle) {
-                        case TableViewStyle.Graph:
+                    var viewType = ViewType[fetchedData.type.valueOf()];
+                    switch (viewType) {
+                        case ViewType.Graph:
                             renderGraphToView(viewId, view, fetchedData, template, style);
                             break;
-                        case TableViewStyle.Table:
+                        case ViewType.Table:
                             renderTableToView(viewId, view, fetchedData);
                             break;
-                        case TableViewStyle.List:
-                        case TableViewStyle.Gallery:
+                        case ViewType.List:
+                        case ViewType.Gallery:
                             renderCollectionToView(viewId, view, fetchedData, template);
                             break;
                         // not yet implemented
@@ -14873,15 +14891,16 @@ function fetchAndRerenderData(viewId, view, page) {
                 var template = getTemplate(fetchedData);
                 var style = getStyle(fetchedData);
                 view.innerHTML = ""; // clear out just the content and reload
-                switch (fetchedData.viewStyle) {
-                    case TableViewStyle.Graph:
+                var viewType = ViewType[fetchedData.type.valueOf()];
+                switch (viewType) {
+                    case ViewType.Graph:
                         renderGraphToView(viewId, view, fetchedData, template, style);
                         break;
-                    case TableViewStyle.Table:
+                    case ViewType.Table:
                         renderTableToView(viewId, view, fetchedData);
                         break;
-                    case TableViewStyle.List:
-                    case TableViewStyle.Gallery:
+                    case ViewType.List:
+                    case ViewType.Gallery:
                         renderCollectionToView(viewId, view, fetchedData, template);
                         break;
                     // not yet implemented

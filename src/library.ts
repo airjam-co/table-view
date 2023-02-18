@@ -1,7 +1,6 @@
 import Chart from 'chart.js/auto';
 import { ChartType } from "chart.js";
-import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, TableViewStyle } from "@airjam/types";
-import { template_cache, style_cache } from './include/template_cache';
+import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache } from "@airjam/types";
 
 // const SERVING_DATA_URL: string = "http://airjam.co/s/data?id=";
 const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
@@ -27,15 +26,16 @@ export default function fetchAndRenderData() {
           const styleElement = document.createElement('style');
           styleElement.appendChild(window.document.createTextNode(style.style));
           window.document.head.appendChild(styleElement);
-          switch(fetchedData.viewStyle) {
-            case TableViewStyle.Graph:
+          const viewType = ViewType[fetchedData.type.valueOf() as keyof typeof ViewType];
+          switch(viewType) {
+            case ViewType.Graph:
               renderGraphToView(viewId, view, fetchedData, template, style);
               break;
-            case TableViewStyle.Table:
+            case ViewType.Table:
               renderTableToView(viewId, view, fetchedData, template, style);
               break;
-            case TableViewStyle.List:
-            case TableViewStyle.Gallery:
+            case ViewType.List:
+            case ViewType.Gallery:
               renderCollectionToView(viewId, view, fetchedData, template, style);
               break;
             default:
@@ -55,15 +55,16 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
         const template = getTemplate(fetchedData);
         const style = getStyle(fetchedData);
         view.innerHTML = ""; // clear out just the content and reload
-        switch(fetchedData.viewStyle) {
-          case TableViewStyle.Graph:
+        const viewType = ViewType[fetchedData.type.valueOf() as keyof typeof ViewType];
+        switch(viewType) {
+          case ViewType.Graph:
             renderGraphToView(viewId, view, fetchedData, template, style);
             break;
-          case TableViewStyle.Table:
+          case ViewType.Table:
             renderTableToView(viewId, view, fetchedData, template, style);
             break;
-          case TableViewStyle.List:
-          case TableViewStyle.Gallery:
+          case ViewType.List:
+          case ViewType.Gallery:
             renderCollectionToView(viewId, view, fetchedData, template, style);
             break;
           default:
