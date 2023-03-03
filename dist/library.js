@@ -14548,7 +14548,7 @@
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "card list.",
+          description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
           visibility: "PUBLIC",
           pages: ["LIST"],
           properties: {},
@@ -14556,27 +14556,27 @@
           templateFields: {
               title: {
                   name: "Title",
-                  description: "title",
+                  description: "Title of the card item",
                   compatibleTypes: [], //empty for all
               },
               link: {
                   name: "Link",
-                  description: "Link to open",
+                  description: "Link to navigate to",
                   compatibleTypes: [DataSourceFieldType.Link]
               },
               linkText: {
                   name: "Link Text",
-                  description: "Link text",
+                  description: "Text for the link",
                   compatibleTypes: [],
               },
               thumbnail: {
                   name: "Thumbnail image",
-                  description: "thumbnail image",
+                  description: "Main image for the card",
                   compatibleTypes: [DataSourceFieldType.Link],
               },
               description: {
                   name: "Description",
-                  description: "descriptions",
+                  description: "Item's description",
                   compatibleTypes: [],
               }
           },
@@ -14587,11 +14587,11 @@
           shortId: "standard_table",
           compatibleWith: ["table_view"],
           compatibleDisplayType: [ViewType.Table],
-          name: "Standard Table",
+          name: "Table",
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "table, as shown on the sheet itself.",
+          description: "Table template shows your data in a tabular format.",
           visibility: "PUBLIC",
           pages: ["LIST"],
           templateContent: "",
@@ -14605,7 +14605,7 @@
               },
               striped: {
                   name: "Striped rows",
-                  description: "Do row colors alternate",
+                  description: "Check to make the background colors of rows alternate",
                   default: true,
                   type: "BOOLEAN"
               },
@@ -14621,7 +14621,7 @@
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "bar chart, rows must be horizontal and data in the second row to work.",
+          description: "The bar chart template assumes each column in your data as a bar. Also, the data must be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
           templateContent: "",
@@ -14659,7 +14659,7 @@
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "pie chart, rows must be horizontal and data in the second row to work.",
+          description: "Pie chart template uses the first two rows of your data to visualize the chart and its labels. Please note, data must be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
           templateContent: "",
@@ -14697,7 +14697,7 @@
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "line chart, rows must be horizontal and data in the second row to work.",
+          description: "Line chart template requires all non-label data to be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
           templateContent: "",
@@ -14725,20 +14725,124 @@
           componentProperties: {
               chartType: "line"
           }
-      }
+      },
+      "formal_menu": {
+          _id: "",
+          shortId: "formal_menu",
+          compatibleWith: ["table_view"],
+          compatibleDisplayType: [ViewType.List],
+          name: "Formal Menu",
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "This template displays data as a menu / catalog of items with prices.",
+          visibility: "PUBLIC",
+          pages: ["LIST"],
+          properties: {},
+          templateContent: "<div class='container'><span class='name'>{{name}}</span><span class='description'>{{description}}</span><span class='price'>{{price}}</span></div>",
+          templateFields: {
+              name: {
+                  name: "Name",
+                  description: "Item name",
+                  compatibleTypes: [], //empty for all
+              },
+              price: {
+                  name: "Price",
+                  description: "Item price",
+                  compatibleTypes: []
+              },
+              description: {
+                  name: "Description",
+                  description: "Item's description",
+                  compatibleTypes: [],
+              }
+          },
+          componentProperties: {}
+      },
+      "graphic_menu": {
+          _id: "",
+          shortId: "graphic_menu",
+          compatibleWith: ["table_view"],
+          compatibleDisplayType: [ViewType.Gallery],
+          name: "Graphic Menu",
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "This template displays data as a menu / catalog of items with prices and images.",
+          visibility: "PUBLIC",
+          pages: ["LIST"],
+          properties: {},
+          templateContent: "<div class='container'><span class='image'><img src='{{image}}'/></span><span class='name'>{{name}}</span><span class='price'>{{price}}</span><span class='description'>{{description}}</span></div>",
+          templateFields: {
+              name: {
+                  name: "Name",
+                  description: "Item name",
+                  compatibleTypes: [], //empty for all
+              },
+              price: {
+                  name: "Price",
+                  description: "Item price",
+                  compatibleTypes: []
+              },
+              image: {
+                  name: "Item Image",
+                  description: "Image for the item",
+                  compatibleTypes: [DataSourceFieldType.Link],
+              },
+              description: {
+                  name: "Description",
+                  description: "Item's description",
+                  compatibleTypes: [],
+              }
+          },
+          componentProperties: {}
+      },
+      "job_postings": {
+          _id: "",
+          shortId: "job_postings",
+          compatibleWith: ["table_view"],
+          compatibleDisplayType: [ViewType.List],
+          name: "Job Postings",
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
+          visibility: "PUBLIC",
+          pages: ["LIST"],
+          properties: {},
+          templateContent: "<div class='container'><span class='title'><a href='{{link}}'>{{title}}</a></span><span class='description'>{{description}}</span></div>",
+          templateFields: {
+              title: {
+                  name: "Title",
+                  description: "Title of the posting",
+                  compatibleTypes: [], //empty for all
+              },
+              link: {
+                  name: "Call To Action Link",
+                  description: "Link to navigate to",
+                  compatibleTypes: [DataSourceFieldType.Link]
+              },
+              description: {
+                  name: "Description",
+                  description: "Short description for the posting",
+                  compatibleTypes: [],
+              }
+          },
+          componentProperties: {}
+      },
   };
   var style_cache = {
       "muted": {
           _id: "",
           shortId: "muted",
           name: "Muted",
-          compatibleWith: ["barchart"],
+          compatibleWith: ["barchart", "piechart", "linechart", "standard_table"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "single green color theme set",
+          description: "Colors that blend in and harmonize.",
           visibility: "PUBLIC",
-          style: ".muted>.table>tbody>tr:nth-child(odd)>td, .muted>.table>tbody>tr:nth-child(odd)>th { background-color: #F9F9FB; } .muted>.table th { font-size: smaller; color: #23262E; } .muted>.table>tbody>tr, .muted>.table>thead>tr { border: 0px solid transparent }",
+          style: ".muted>.table {text-align: left} .muted>.table>thead { font-size: 20px; background-color: #EFE2BA; } .muted>.table>tbody>tr:nth-child(odd)>td, .muted>.table>tbody>tr:nth-child(odd)>th { background-color: #f2f0e8; } .muted>.table th { font-size: smaller; color: #23262E; } .muted>.table>tbody>tr, .muted>.table>thead>tr { border: 0px solid transparent }",
           containerClassNames: ["muted"],
           properties: {
               borderWidth: {
@@ -14765,13 +14869,13 @@
           _id: "",
           shortId: "earthy",
           name: "Earthy",
-          compatibleWith: ["barchart"],
+          compatibleWith: ["barchart", "piechart", "linechart"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "single green color theme set",
+          description: "Colors inspired by nature to show a calm and peaceful look.",
           visibility: "PUBLIC",
-          style: ".earthy>.table { border: 0.1em solid #E1E0E2; border-radius: 10px !important; border-collapse: separate; border-spacing: 0; overflow: hidden; } .earthy>.table thead { background-color: #F9FBFC; } .earthy>.table th { font-size: smaller; color: #828286; } .earthy>.table>tbody>tr, .earthy>.table>thead>tr { border-color: #F6F5F8 } .earthy>.table>tbody>tr:last-child { border: 0px solid transparent }",
+          style: ".earthy>.table { border: 0.1em solid #E1E0E2; border-radius: 10px !important; border-collapse: separate; border-spacing: 0; overflow: hidden; text-align: left; } .earthy>.table thead { background-color: #F9FBFC; } .earthy>.table th { font-size: smaller; color: #828286; } .earthy>.table>tbody>tr, .earthy>.table>thead>tr { border-color: #F6F5F8 } .earthy>.table>tbody>tr:last-child { border: 0px solid transparent }",
           containerClassNames: ["earthy"],
           properties: {
               borderWidth: {
@@ -14798,13 +14902,13 @@
           _id: "",
           shortId: "outback",
           name: "Outback",
-          compatibleWith: ["barchart"],
+          compatibleWith: ["barchart", "piechart", "linechart", "standard_table"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "single green color theme set",
+          description: "Colors inspired by sands and succulent biome.",
           visibility: "PUBLIC",
-          style: ".outback>.table th { font-size: smaller; color: #23262E; } .outback>.table>thead>tr { border: 0px solid transparent; border-top: 1px solid #EAE9EE; }",
+          style: ".outback>.table { text-align: left; } .outback>.table>thead { font-size: 20px; background-color: #FBEEC1; } .outback>.table th { font-size: smaller; color: #23262E; } .outback>.table>thead>tr { border: 0px solid transparent; } .outback>.table>tbody>tr:nth-child(odd)>td, .outback>.table>tbody>tr:nth-child(odd)>th { background-color: #faf7ec; }",
           containerClassNames: ["outback"],
           properties: {
               borderWidth: {
@@ -14830,16 +14934,112 @@
       "concise_gallery": {
           _id: "",
           shortId: "concise_gallery",
-          name: "Concise gallery list",
+          name: "Minimal Gallery",
           compatibleWith: ["card_list"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "Concision is the key.",
+          description: "Minimalistic look and feel for gallery-typed templates.",
           visibility: "PUBLIC",
           style: ".concise_gallery .container { display: inline-grid; padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 10px; margin: 5px; } .concise_gallery .container .title { font-size: 1.2 rem; font-weight: 600; }  .concise_gallery .container .image img { width: 100% } .concise_gallery .container .description { display: block } .concise_gallery .pagination a, .concise_gallery .pagination span { margin: 2px; padding: 3px; }",
           containerClassNames: ["concise_gallery"],
           colorTheme: ["#ddd"],
+          properties: {},
+          componentProperties: {}
+      },
+      "fine_dining": {
+          _id: "",
+          shortId: "fine_dining",
+          name: "Fine Dining Menu",
+          compatibleWith: ["formal_menu"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Traditional look and feel for menu templates.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Castoro&display=swap'); .fine_dining .container { font-family: 'Castoro', serif; display: block; padding: 10px; text-align: center } .fine_dining .container .name { font-size: 20px; }  .fine_dining .container .price { font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .fine_dining .container .description { display: block } .fine_dining .pagination a, .fine_dining .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["fine_dining"],
+          colorTheme: ["#000"],
+          properties: {},
+          componentProperties: {}
+      },
+      "contemporary_fine_dining": {
+          _id: "",
+          shortId: "contemporary_fine_dining",
+          name: "Contemporary Sans",
+          compatibleWith: ["formal_menu"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Modern look and feel for fine dining menu templates.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Tenor+Sans&display=swap'); .contemporary_fine_dining .container { display: block; padding: 10px; text-align: center } .contemporary_fine_dining .container .name { font-family: 'Tenor Sans', sans-serif; font-size: 20px; } .contemporary_fine_dining .container .price { font-family: 'Tenor Sans', sans-serif; font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .contemporary_fine_dining .container .description { font-family: 'Playfair Display', serif; font-style: italic; display: block } .contemporary_fine_dining .pagination a, .contemporary_fine_dining .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["contemporary_fine_dining"],
+          colorTheme: ["#000"],
+          properties: {},
+          componentProperties: {}
+      },
+      "healthy_five": {
+          _id: "",
+          shortId: "healthy_five",
+          name: "Healthy Five",
+          compatibleWith: ["graphic_menu"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Vibrant style for graphic menu templates with emphasis on item image.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .healthy_five .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Open Sans', sans-serif; } .healthy_five .container .image img { display: block; max-width: 100%; height: auto; margin: 10px 0 5px 0; } .healthy_five .container .name { font-size: 20px; } .healthy_five .container .price { font-size: 18px; display: block; } .healthy_five .container .description { display: block } .healthy_five .pagination a, .healthy_five .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["healthy_five"],
+          colorTheme: ["#000"],
+          properties: {},
+          componentProperties: {}
+      },
+      "menu_boxes": {
+          _id: "",
+          shortId: "menu_boxes",
+          name: "Boxed Menu",
+          compatibleWith: ["graphic_menu"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Graphic menu templates with container boxes around each menu item.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_boxes .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_boxes .container .image { object-fit: cover; } .menu_boxes .container .image img { display: block; width: 100%; height: 200px; margin: 5px 0 5px 0; } .menu_boxes .container .name { font-size: 16px; } .menu_boxes .container .price { font-size: 14px; display: block; } .menu_boxes .container .description { display: block; font-size: 14px; } .menu_boxes .pagination a, .menu_boxes .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["menu_boxes"],
+          colorTheme: ["#efefef", "#000"],
+          properties: {},
+          componentProperties: {}
+      },
+      "menu_box_list": {
+          _id: "",
+          shortId: "menu_box_list",
+          name: "Boxed List",
+          compatibleWith: ["graphic_menu"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Graphic menu templates with stacked container boxes displayed like a list.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_box_list .container { display: inline-block; width: 400px; height: 100px; padding: 5px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_box_list .container .image { height: 100px; float: right; } .menu_box_list .container .image img { display: block; width: 100px; height: 100px; object-fit: cover; } .menu_box_list .container .name { font-size: 16px; margin-bottom: 5px; } .menu_box_list .container .price { font-size: 14px; display: block; margin-bottom: 10px } .menu_box_list .container .description { display: block; font-size: 14px; } .menu_box_list .pagination a, .menu_box_list .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["menu_box_list"],
+          colorTheme: ["#efefef", "#000"],
+          properties: {},
+          componentProperties: {}
+      },
+      "job_posting_plain": {
+          _id: "",
+          shortId: "job_posting_plain",
+          name: "Plain",
+          compatibleWith: ["job_postings"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Graphic menu templates with stacked container boxes displayed like a list.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .job_posting_plain .container a { color: #000; text-decoration: none; } .job_posting_plain .container a:hover { text-decoration: underline; } .job_posting_plain .container { display: block; font-family: 'Open Sans', sans-serif; border-top: 1px solid #aaa; margin: 5px 0 5px 0; padding: 15px 0 15px 0; } .job_posting_plain .container .title { font-size: 20px; margin-bottom: 5px; } .job_posting_plain .container .description { display: block; font-size: 16px; } .job_posting_plain .pagination a, .job_posting_plain .pagination span { margin: 2px; padding: 3px; }",
+          containerClassNames: ["job_posting_plain"],
+          colorTheme: ["#fff", "#000", "#aaa"],
           properties: {},
           componentProperties: {}
       }
