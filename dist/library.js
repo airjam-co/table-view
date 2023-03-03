@@ -14509,9 +14509,9 @@
   (function (ViewComponentType) {
       ViewComponentType["TableView"] = "table_view";
   })(ViewComponentType || (ViewComponentType = {}));
+  //     Board = "view_board", not used, for now.
   var ViewType;
   (function (ViewType) {
-      ViewType["Board"] = "view_board";
       ViewType["List"] = "view_list";
       ViewType["Gallery"] = "view_gallery";
       ViewType["Graph"] = "view_graph";
@@ -14547,7 +14547,7 @@
           name: "Card List",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/card_list.png"],
           description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14590,7 +14590,7 @@
           name: "Table",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/table.png"],
           description: "Table template shows your data in a tabular format.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14620,7 +14620,7 @@
           name: "Bar Chart",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/barchart.png"],
           description: "The bar chart template assumes each column in your data as a bar. Also, the data must be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14658,7 +14658,7 @@
           name: "Pie Chart",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/piechart.png"],
           description: "Pie chart template uses the first two rows of your data to visualize the chart and its labels. Please note, data must be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14696,7 +14696,7 @@
           name: "Line Chart",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/linechart.png"],
           description: "Line chart template requires all non-label data to be in numeric format to work.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14734,7 +14734,7 @@
           name: "Formal Menu",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/fine_dining_menu.png"],
           description: "This template displays data as a menu / catalog of items with prices.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14767,7 +14767,7 @@
           name: "Graphic Menu",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/boxed_list.png", "/images/templates/boxed_menu.png"],
           description: "This template displays data as a menu / catalog of items with prices and images.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -14805,7 +14805,7 @@
           name: "Job Postings",
           ownerId: "",
           version: 1,
-          previewImageUrls: [],
+          previewImageUrls: ["/images/templates/job_postings.png"],
           description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
           visibility: "PUBLIC",
           pages: ["LIST"],
@@ -15035,7 +15035,7 @@
           ownerId: "",
           version: 1,
           previewImageUrls: [],
-          description: "Graphic menu templates with stacked container boxes displayed like a list.",
+          description: "Plain job postings style.",
           visibility: "PUBLIC",
           style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .job_posting_plain .container a { color: #000; text-decoration: none; } .job_posting_plain .container a:hover { text-decoration: underline; } .job_posting_plain .container { display: block; font-family: 'Open Sans', sans-serif; border-top: 1px solid #aaa; margin: 5px 0 5px 0; padding: 15px 0 15px 0; } .job_posting_plain .container .title { font-size: 20px; margin-bottom: 5px; } .job_posting_plain .container .description { display: block; font-size: 16px; } .job_posting_plain .pagination a, .job_posting_plain .pagination span { margin: 2px; padding: 3px; }",
           containerClassNames: ["job_posting_plain"],
@@ -15045,8 +15045,8 @@
       }
   };
 
-  // const SERVING_DATA_URL: string = "http://airjam.co/s/data?id=";
-  var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
+  var SERVING_DATA_URL = "http://airjam.co/s/data?id=";
+  //const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
   var PAGINATION_SHOW_SIZE = 7;
   var currentPage = {}; // global variable that keeps track of current page.
   function fetchAndRenderData() {

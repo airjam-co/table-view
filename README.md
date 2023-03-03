@@ -26,10 +26,10 @@ The TypeScript library template. Click "Use this template on GitHub".
 npm install @airjam/table-view
 ```
 
-[Browser](//my-templates.github.io/TypeScript-Library/dist/library.js)
+[Browser](https://airjam-co.github.io/table-view/dist/library.min.js)
 
 ```html
-<script src="//my-templates.github.io/TypeScript-Library/dist/library.min.js"></script>
+<script src="https://airjam-co.github.io/table-view/dist/library.min.js"></script>
 ```
 
 ## Import package to the project
