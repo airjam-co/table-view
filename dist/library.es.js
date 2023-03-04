@@ -15040,7 +15040,7 @@ var style_cache = {
 };
 
 var SERVING_DATA_URL = "http://airjam.co/s/data?id=";
-//const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
+//const SERVING_DATA_URL: string = "https://localhost:3001/s/data?id=";
 var PAGINATION_SHOW_SIZE = 7;
 var currentPage = {}; // global variable that keeps track of current page.
 function fetchAndRenderData() {
