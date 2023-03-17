@@ -14516,6 +14516,7 @@
       ViewType["Gallery"] = "view_gallery";
       ViewType["Graph"] = "view_graph";
       ViewType["Table"] = "view_table";
+      ViewType["Map"] = "view_map";
   })(ViewType || (ViewType = {}));
   var PaginationStyle;
   (function (PaginationStyle) {
@@ -14532,12 +14533,22 @@
       DataSourceFieldType["Percent"] = "percent";
       DataSourceFieldType["Link"] = "link";
       DataSourceFieldType["Email"] = "email";
+      DataSourceFieldType["LatLng"] = "latlng";
+      DataSourceFieldType["Address"] = "address";
   })(DataSourceFieldType || (DataSourceFieldType = {}));
   var SortBy;
   (function (SortBy) {
       SortBy["RECENT"] = "recent";
       SortBy["OLDEST"] = "oldest";
   })(SortBy || (SortBy = {}));
+  var PageTypes;
+  (function (PageTypes) {
+      PageTypes["LIST"] = "LIST";
+      PageTypes["DETAIL"] = "DETAIL";
+      PageTypes["EDIT"] = "EDIT";
+      PageTypes["CREATE"] = "CREATE";
+      PageTypes["MARKER"] = "MARKER";
+  })(PageTypes || (PageTypes = {}));
   var template_cache = {
       "card_list": {
           _id: "",
@@ -14550,9 +14561,9 @@
           previewImageUrls: ["/images/templates/card_list.png"],
           description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
+          pages: [PageTypes.LIST],
           properties: {},
-          templateContent: "<div class='container'><span class='title'>{{title}}</span><span class='image'><img src='{{thumbnail}}'/></span><span class='description'>{{description}}</span><span><a href='{{link}}'>{{linkText}}</a></span></div>",
+          pageContent: { "LIST": "<div class='container'><span class='title'>{{title}}</span><span class='image'><img src='{{thumbnail}}'/></span><span class='description'>{{description}}</span><span><a href='{{link}}'>{{linkText}}</a></span></div>" },
           templateFields: {
               title: {
                   name: "Title",
@@ -14593,22 +14604,16 @@
           previewImageUrls: ["/images/templates/table.png"],
           description: "Table template shows your data in a tabular format.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
-          templateContent: "",
+          pages: [PageTypes.LIST],
+          pageContent: {},
           templateFields: {},
           properties: {
               caption: {
                   name: "Caption",
-                  description: "Use component's title as a caption",
+                  description: "Use component's title as a caption for the table",
                   default: false,
                   type: "BOOLEAN"
-              },
-              striped: {
-                  name: "Striped rows",
-                  description: "Check to make the background colors of rows alternate",
-                  default: true,
-                  type: "BOOLEAN"
-              },
+              }
           },
           componentProperties: {}
       },
@@ -14623,13 +14628,13 @@
           previewImageUrls: ["/images/templates/barchart.png"],
           description: "The bar chart template assumes each column in your data as a bar. Also, the data must be in numeric format to work.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
-          templateContent: "",
+          pages: [PageTypes.LIST],
+          pageContent: {},
           templateFields: {},
           properties: {
               useFirstColumnAsLabels: {
-                  name: "First Column is Labels",
-                  description: "Use first column as labels",
+                  name: "Use First Column as Label",
+                  description: "Use first column of the data as labels for each dataset",
                   default: true,
                   type: "BOOLEAN"
               },
@@ -14640,8 +14645,20 @@
                   type: "BOOLEAN"
               },
               showVertically: {
-                  name: "ShowVertically",
-                  description: "Display graph vertically, rather than horizontally",
+                  name: "Show Vertically",
+                  description: "Chart graph in vertical orientation",
+                  default: false,
+                  type: "BOOLEAN"
+              },
+              roundedBars: {
+                  name: "Rounded Bars",
+                  description: "Make bars round",
+                  default: false,
+                  type: "BOOLEAN"
+              },
+              stackedBars: {
+                  name: "Stacked Bars",
+                  description: "Stack bars of the same group",
                   default: false,
                   type: "BOOLEAN"
               }
@@ -14661,13 +14678,13 @@
           previewImageUrls: ["/images/templates/piechart.png"],
           description: "Pie chart template uses the first two rows of your data to visualize the chart and its labels. Please note, data must be in numeric format to work.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
-          templateContent: "",
+          pages: [PageTypes.LIST],
+          pageContent: {},
           templateFields: {},
           properties: {
               useFirstColumnAsLabels: {
-                  name: "First Column is Labels",
-                  description: "Use first column as labels",
+                  name: "Use First Column as Label",
+                  description: "Use first column of the data as labels for each dataset",
                   default: true,
                   type: "BOOLEAN"
               },
@@ -14676,16 +14693,42 @@
                   description: "Show legends of labels in the graph",
                   default: true,
                   type: "BOOLEAN"
-              },
-              showVertically: {
-                  name: "ShowVertically",
-                  description: "Display graph vertically, rather than horizontally",
-                  default: false,
-                  type: "BOOLEAN"
               }
           },
           componentProperties: {
               chartType: "pie"
+          }
+      },
+      "doughnutchart": {
+          _id: "",
+          shortId: "doughnutchart",
+          compatibleWith: ["table_view"],
+          compatibleDisplayType: [ViewType.Graph],
+          name: "Doughnut Chart",
+          ownerId: "",
+          version: 1,
+          previewImageUrls: ["/images/templates/piechart.png"],
+          description: "Doughnut chart template uses the first two rows of your data to visualize the chart and its labels. Please note, data must be in numeric format to work.",
+          visibility: "PUBLIC",
+          pages: [PageTypes.LIST],
+          pageContent: {},
+          templateFields: {},
+          properties: {
+              useFirstColumnAsLabels: {
+                  name: "Use First Column as Label",
+                  description: "Use first column of the data as labels for each dataset",
+                  default: true,
+                  type: "BOOLEAN"
+              },
+              showLegends: {
+                  name: "Show Legends",
+                  description: "Show legends of labels in the graph",
+                  default: true,
+                  type: "BOOLEAN"
+              }
+          },
+          componentProperties: {
+              chartType: "doughnut"
           }
       },
       "linechart": {
@@ -14699,13 +14742,13 @@
           previewImageUrls: ["/images/templates/linechart.png"],
           description: "Line chart template requires all non-label data to be in numeric format to work.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
-          templateContent: "",
+          pages: [PageTypes.LIST],
+          pageContent: {},
           templateFields: {},
           properties: {
               useFirstColumnAsLabels: {
-                  name: "First Column is Labels",
-                  description: "Use first column as labels",
+                  name: "Use First Column as Label",
+                  description: "Use first column of the data as labels for each dataset",
                   default: true,
                   type: "BOOLEAN"
               },
@@ -14716,8 +14759,14 @@
                   type: "BOOLEAN"
               },
               showVertically: {
-                  name: "ShowVertically",
-                  description: "Display graph vertically, rather than horizontally",
+                  name: "Show Vertically",
+                  description: "Chart graph in vertical orientation",
+                  default: false,
+                  type: "BOOLEAN"
+              },
+              fill: {
+                  name: "Fill lines",
+                  description: "Fill area under the line",
                   default: false,
                   type: "BOOLEAN"
               }
@@ -14737,9 +14786,9 @@
           previewImageUrls: ["/images/templates/fine_dining_menu.png"],
           description: "This template displays data as a menu / catalog of items with prices.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
+          pages: [PageTypes.LIST],
           properties: {},
-          templateContent: "<div class='container'><span class='name'>{{name}}</span><span class='description'>{{description}}</span><span class='price'>{{price}}</span></div>",
+          pageContent: { "LIST": "<div class='container'><span class='name'>{{name}}</span><span class='description'>{{description}}</span><span class='price'>{{price}}</span></div>" },
           templateFields: {
               name: {
                   name: "Name",
@@ -14770,9 +14819,9 @@
           previewImageUrls: ["/images/templates/boxed_list.png", "/images/templates/boxed_menu.png"],
           description: "This template displays data as a menu / catalog of items with prices and images.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
+          pages: [PageTypes.LIST],
           properties: {},
-          templateContent: "<div class='container'><span class='image'><img src='{{image}}'/></span><span class='name'>{{name}}</span><span class='price'>{{price}}</span><span class='description'>{{description}}</span></div>",
+          pageContent: { "LIST": "<div class='container'><span class='image'><img src='{{image}}'/></span><span class='name'>{{name}}</span><span class='price'>{{price}}</span><span class='description'>{{description}}</span></div>" },
           templateFields: {
               name: {
                   name: "Name",
@@ -14808,9 +14857,9 @@
           previewImageUrls: ["/images/templates/job_postings.png"],
           description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
           visibility: "PUBLIC",
-          pages: ["LIST"],
+          pages: [PageTypes.LIST],
           properties: {},
-          templateContent: "<div class='container'><span class='title'><a href='{{link}}'>{{title}}</a></span><span class='description'>{{description}}</span></div>",
+          pageContent: { "LIST": "<div class='container'><span class='title'><a href='{{link}}'>{{title}}</a></span><span class='description'>{{description}}</span></div>" },
           templateFields: {
               title: {
                   name: "Title",
@@ -14830,13 +14879,79 @@
           },
           componentProperties: {}
       },
+      "store_locator": {
+          _id: "",
+          shortId: "store_locator",
+          compatibleWith: ["table_view"],
+          compatibleDisplayType: [ViewType.Map],
+          name: "Store Locator",
+          ownerId: "",
+          version: 1,
+          previewImageUrls: ["/images/templates/job_postings.png"],
+          description: "This template displays each row of data as a pinpoint on a map.",
+          visibility: "PUBLIC",
+          pages: [PageTypes.LIST, PageTypes.MARKER],
+          properties: {},
+          pageContent: {
+              "LIST": "<div class='container'><span class='label'>{{index}}. {{label}}</span><span class='description'>{{description}}</span><span class='location'>{{location}}</span><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a></div>",
+              "MARKER": "<div class='container'><span class='label'>{{index}}. {{label}}</span><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a></div>"
+          },
+          templateFields: {
+              label: {
+                  name: "Label",
+                  description: "Label of the place marker",
+                  compatibleTypes: [], //empty for all
+              },
+              location: {
+                  name: "Location",
+                  description: "Address or latitude / longitude of the place marker",
+                  compatibleTypes: [DataSourceFieldType.Address, DataSourceFieldType.LatLng], //empty for all
+              },
+              description: {
+                  name: "Description",
+                  description: "(Optional) Description of the place marker",
+                  compatibleTypes: [], //empty for all
+              },
+              markerOverride: {
+                  name: "Marker Image",
+                  description: "(Optional) URL of the image to use for place marker",
+                  compatibleTypes: [DataSourceFieldType.Link],
+              },
+              image: {
+                  name: "Main Image",
+                  description: "(Optional) URL of the image to use in the description of the place marker",
+                  compatibleTypes: [DataSourceFieldType.Link],
+              },
+              calloutLink1: {
+                  name: "Callout Link",
+                  description: "(Optional) A link to call out to",
+                  compatibleTypes: [DataSourceFieldType.Link],
+              },
+              calloutLinkText1: {
+                  name: "Callout Link Text",
+                  description: "(Optional) Text for the link to call out to",
+                  compatibleTypes: [],
+              },
+              calloutLink2: {
+                  name: "Second Callout Link",
+                  description: "(Optional) A second link to call out to",
+                  compatibleTypes: [DataSourceFieldType.Link],
+              },
+              calloutLinkText2: {
+                  name: "Second Callout Link Text",
+                  description: "(Optional) Text for the second link to call out to",
+                  compatibleTypes: [],
+              }
+          },
+          componentProperties: {}
+      },
   };
   var style_cache = {
       "muted": {
           _id: "",
           shortId: "muted",
           name: "Muted",
-          compatibleWith: ["barchart", "piechart", "linechart", "standard_table"],
+          compatibleWith: ["barchart", "piechart", "linechart", "doughnutchart", "standard_table"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
@@ -14869,7 +14984,7 @@
           _id: "",
           shortId: "earthy",
           name: "Earthy",
-          compatibleWith: ["barchart", "piechart", "linechart"],
+          compatibleWith: ["barchart", "piechart", "linechart", "doughnutchart"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
@@ -14902,7 +15017,7 @@
           _id: "",
           shortId: "outback",
           name: "Outback",
-          compatibleWith: ["barchart", "piechart", "linechart", "standard_table"],
+          compatibleWith: ["barchart", "piechart", "linechart", "doughnutchart", "standard_table"],
           ownerId: "",
           version: 1,
           previewImageUrls: [],
@@ -15042,11 +15157,891 @@
           colorTheme: ["#fff", "#000", "#aaa"],
           properties: {},
           componentProperties: {}
+      },
+      "map_outback": {
+          _id: "",
+          shortId: "map_outback",
+          name: "Outback",
+          compatibleWith: ["store_locator"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Natural look and feel.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_outback { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #9ca5b3; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #a5b076; font-size: 14px; text-decoration: none; color: #000 }",
+          containerClassNames: ["map_outback"],
+          colorTheme: ["ae9e90", "a5b076", "93817c", "#ebe3cd", "#523735", "#f5f1e6", "c9b2a6"],
+          properties: {},
+          componentProperties: {},
+          jsonContent: [
+              {
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#ebe3cd"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#523735"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.stroke",
+                  "stylers": [
+                      {
+                          "color": "#f5f1e6"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative",
+                  "elementType": "geometry.stroke",
+                  "stylers": [
+                      {
+                          "color": "#c9b2a6"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "elementType": "geometry.stroke",
+                  "stylers": [
+                      {
+                          "color": "#dcd2be"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#ae9e90"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.neighborhood",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "landscape.natural",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#dfd2ae"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#dfd2ae"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#93817c"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.business",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "geometry.fill",
+                  "stylers": [
+                      {
+                          "color": "#a5b076"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#447530"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#f5f1e6"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#fdfcf8"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#f8c967"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "geometry.stroke",
+                  "stylers": [
+                      {
+                          "color": "#e9bc62"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway.controlled_access",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#e98d58"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway.controlled_access",
+                  "elementType": "geometry.stroke",
+                  "stylers": [
+                      {
+                          "color": "#db8555"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#806b63"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.line",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#dfd2ae"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.line",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#8f7d77"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.line",
+                  "elementType": "labels.text.stroke",
+                  "stylers": [
+                      {
+                          "color": "#ebe3cd"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.station",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#dfd2ae"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "geometry.fill",
+                  "stylers": [
+                      {
+                          "color": "#b9d3c2"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#92998d"
+                      }
+                  ]
+              }
+          ]
+      },
+      "map_inverted": {
+          _id: "",
+          shortId: "map_inverted",
+          name: "Inverted",
+          compatibleWith: ["store_locator"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Designed to blend with darker color themes.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_inverted { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #746855; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #746855; font-size: 14px; text-decoration: none; color: #000 }",
+          containerClassNames: ["map_inverted"],
+          colorTheme: ["#746855", "#d59563", "#6b9a76", "#9ca5b3", "#17263c"],
+          properties: {},
+          componentProperties: {},
+          jsonContent: [
+              {
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#212121"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.icon",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.stroke",
+                  "stylers": [
+                      {
+                          "color": "#212121"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.country",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#9e9e9e"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.locality",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#bdbdbd"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.neighborhood",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.business",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#181818"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#616161"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text.stroke",
+                  "stylers": [
+                      {
+                          "color": "#1b1b1b"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road",
+                  "elementType": "geometry.fill",
+                  "stylers": [
+                      {
+                          "color": "#2c2c2c"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#8a8a8a"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#373737"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#3c3c3c"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway.controlled_access",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#4e4e4e"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#616161"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#000000"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#3d3d3d"
+                      }
+                  ]
+              }
+          ]
+      },
+      "map_silver": {
+          _id: "",
+          shortId: "map_silver",
+          name: "Silver",
+          compatibleWith: ["store_locator"],
+          ownerId: "",
+          version: 1,
+          previewImageUrls: [],
+          description: "Map is designed to be suppressed from the placemarks.",
+          visibility: "PUBLIC",
+          style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_silver { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #746855; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #746855; font-size: 14px; text-decoration: none; color: #000 }",
+          containerClassNames: ["map_silver"],
+          colorTheme: ["#746855", "#d59563", "#6b9a76", "#9ca5b3", "#17263c"],
+          properties: {},
+          componentProperties: {},
+          jsonContent: [
+              {
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#f5f5f5"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.icon",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#616161"
+                      }
+                  ]
+              },
+              {
+                  "elementType": "labels.text.stroke",
+                  "stylers": [
+                      {
+                          "color": "#f5f5f5"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.land_parcel",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#bdbdbd"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "administrative.neighborhood",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#eeeeee"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "labels.text",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.business",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#e5e5e5"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "poi.park",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#9e9e9e"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#ffffff"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road",
+                  "elementType": "labels.icon",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.arterial",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#757575"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#dadada"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "labels",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.highway",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#616161"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "road.local",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#9e9e9e"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit",
+                  "stylers": [
+                      {
+                          "visibility": "off"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.line",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#e5e5e5"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "transit.station",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#eeeeee"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "geometry",
+                  "stylers": [
+                      {
+                          "color": "#c9c9c9"
+                      }
+                  ]
+              },
+              {
+                  "featureType": "water",
+                  "elementType": "labels.text.fill",
+                  "stylers": [
+                      {
+                          "color": "#9e9e9e"
+                      }
+                  ]
+              }
+          ]
       }
   };
 
-  var SERVING_DATA_URL = "https://airjam.co/s/data?id=";
-  //const SERVING_DATA_URL: string = "https://localhost:3001/s/data?id=";
+  class Loader {
+      constructor(apiKey = null, options = {}) {
+          this.apiKey = apiKey;
+          this.options = options;
+          if (typeof window === 'undefined') {
+              throw new Error('google-maps is supported only in browser environment');
+          }
+      }
+      load() {
+          if (typeof this.api !== 'undefined') {
+              return Promise.resolve(this.api);
+          }
+          if (typeof this.loader !== 'undefined') {
+              return this.loader;
+          }
+          window[Loader.CALLBACK_NAME] = () => {
+              this.api = window['google'];
+              if (typeof this.resolve === 'undefined') {
+                  throw new Error('Should not happen');
+              }
+              this.resolve(this.api);
+          };
+          window['gm_authFailure'] = () => {
+              if (typeof this.reject === 'undefined') {
+                  throw new Error('Should not happen');
+              }
+              this.reject(new Error('google-maps: authentication error'));
+          };
+          return this.loader = new Promise((resolve, reject) => {
+              this.resolve = resolve;
+              this.reject = reject;
+              const script = document.createElement('script');
+              script.src = this.createUrl();
+              script.async = true;
+              script.onerror = (e) => reject(e);
+              document.head.appendChild(script);
+          });
+      }
+      createUrl() {
+          const parameters = [
+              `callback=${Loader.CALLBACK_NAME}`,
+          ];
+          if (this.apiKey) {
+              parameters.push(`key=${this.apiKey}`);
+          }
+          for (let name in this.options) {
+              if (this.options.hasOwnProperty(name)) {
+                  let value = this.options[name];
+                  if (name === 'version') {
+                      name = 'v';
+                  }
+                  if (name === 'libraries') {
+                      value = value.join(',');
+                  }
+                  parameters.push(`${name}=${value}`);
+              }
+          }
+          return `https://maps.googleapis.com/maps/api/js?${parameters.join('&')}`;
+      }
+  }
+  Loader.CALLBACK_NAME = '_dk_google_maps_loader_cb';
+
+  //const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
+  var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
   var PAGINATION_SHOW_SIZE = 7;
   var currentPage = {}; // global variable that keeps track of current page.
   function fetchAndRenderData() {
@@ -15081,6 +16076,8 @@
                           case ViewType.Gallery:
                               renderCollectionToView(viewId, view, fetchedData, template);
                               break;
+                          case ViewType.Map:
+                              renderMapToView(viewId, view, fetchedData, template, style);
                           // not yet implemented
                       }
                   });
@@ -15109,14 +16106,161 @@
                       case ViewType.Gallery:
                           renderCollectionToView(viewId, view, fetchedData, template);
                           break;
+                      case ViewType.Map:
+                          renderMapToView(viewId, view, fetchedData, template, style);
                       // not yet implemented
                   }
               });
           });
       }
   }
+  function renderMapToView(viewId, view, fetchedData, template, style) {
+      if (!template.templateFields || !fetchedData.templateFields) {
+          console.log(viewId + " will not be rendered because it does not have required template attributes.");
+          return;
+      }
+      // make the control section. do not add things directly to the controlElement, instead, create a wrapper div on top of control element to add things to the control pane
+      var controlElement = window.document.createElement("div");
+      controlElement.className = "map-control";
+      view.appendChild(controlElement);
+      // make the map section
+      var options = { /* todo */};
+      var loader = new Loader("AIzaSyA8xMW1giwvraqrUpM7bLQeURGjr5VUrBw", options);
+      loader.load().then(function (google) {
+          var mapElement = window.document.createElement("div");
+          mapElement.className = "map-container";
+          view.appendChild(mapElement);
+          var map = new google.maps.Map(mapElement, {
+              zoom: 9,
+              zoomControl: false,
+              panControl: false,
+              scaleControl: false,
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: false,
+              styles: style.jsonContent ? style.jsonContent : []
+          });
+          var geocoder = new google.maps.Geocoder();
+          // three associative maps below are used to associate between markers and their info windows and their container items
+          var markers = {};
+          var infoWindows = {};
+          var containerElements = {};
+          if (fetchedData.templateFields["location"]) {
+              var locationField_1 = fetchedData.templateFields["location"];
+              fetchedData.data.forEach(function (currentDataRow, index) {
+                  if (index === 0) {
+                      return;
+                  }
+                  if (currentDataRow[locationField_1]) {
+                      var locationData = currentDataRow[locationField_1];
+                      if (locationData.display_as === DataSourceFieldType.Address) {
+                          // geocode then add to map
+                          geocoder.geocode({ address: locationData.raw_value }, function (results, status) {
+                              if (status === 'OK') {
+                                  map.setCenter(results[0].geometry.location);
+                                  var templateMap_1 = {};
+                                  Object.keys(template.templateFields).forEach(function (field) {
+                                      if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
+                                          templateMap_1[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
+                                      }
+                                  });
+                                  var entryElement_1 = window.document.createElement("div");
+                                  entryElement_1.className = "map-control-entry";
+                                  entryElement_1.id = viewId + ".map.entry." + index;
+                                  var containerPageContent_1 = template.pageContent[PageTypes.LIST];
+                                  containerPageContent_1 = containerPageContent_1.replaceAll("{{index}}", index);
+                                  Object.entries(templateMap_1).forEach(function (entry) {
+                                      var key = entry[0];
+                                      var value = entry[1];
+                                      containerPageContent_1 = containerPageContent_1.replaceAll("{{" + key + "}}", value);
+                                  });
+                                  entryElement_1.innerHTML += containerPageContent_1;
+                                  containerElements[index] = entryElement_1;
+                                  populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
+                                  var markerPageContent_1 = template.pageContent[PageTypes.MARKER];
+                                  markerPageContent_1 = markerPageContent_1.replaceAll("{{index}}", index);
+                                  Object.entries(templateMap_1).forEach(function (entry) {
+                                      var key = entry[0];
+                                      var value = entry[1];
+                                      markerPageContent_1 = markerPageContent_1.replaceAll("{{" + key + "}}", value);
+                                  });
+                                  // set up info window
+                                  var infoWindow_1 = new google.maps.InfoWindow({
+                                      content: markerPageContent_1,
+                                  });
+                                  infoWindows[index] = infoWindow_1;
+                                  var marker_1 = new google.maps.Marker({
+                                      map: map,
+                                      position: results[0].geometry.location,
+                                      label: index.toString()
+                                  });
+                                  markers[index] = marker_1;
+                                  entryElement_1.addEventListener("mouseover", function (e) {
+                                      map.panTo(results[0].geometry.location);
+                                      closeInfoWindows(infoWindows);
+                                      if (infoWindows[index])
+                                          infoWindows[index].open(map, marker_1);
+                                  });
+                                  marker_1.addListener("click", function () {
+                                      closeInfoWindows(infoWindows);
+                                      infoWindow_1.open(map, marker_1);
+                                      var topPos = entryElement_1.offsetTop;
+                                      controlElement.scrollTop = topPos;
+                                  });
+                                  updateMapBoundToFit(map, markers);
+                              }
+                              else {
+                                  console.log("geocode was unsuccessful:" + status);
+                                  console.log(currentDataRow);
+                                  containerElements[index] = "failed";
+                              }
+                          });
+                      }
+                      else {
+                          console.log("will not display this row: ");
+                          console.log(currentDataRow);
+                          containerElements[index] = "failed";
+                      }
+                  }
+                  else {
+                      containerElements[index] = "failed";
+                  }
+              });
+          }
+      });
+  }
+  // Warning: This is a destructive rendering function for the containerElement.
+  function populateContainerElementsIfFull(fullCount, containerElement, containerElements) {
+      if (Object.keys(containerElements).length !== fullCount) {
+          return;
+      }
+      containerElement.innerHTML = ""; //remove all child node and clear container for new elements.
+      Object.keys(containerElements).map(function (sKey) { return parseInt(sKey); }).sort(function (a, b) { return a - b; }).forEach(function (key) {
+          console.log(key);
+          if ((typeof containerElements[key]) !== (typeof "")) {
+              containerElement.appendChild(containerElements[key]);
+          }
+          else {
+              console.log(key + " is not renderable");
+              console.log(typeof containerElements[key]);
+              console.log(containerElements[key]);
+          }
+      });
+  }
+  function updateMapBoundToFit(map, markerMap) {
+      var bounds = new google.maps.LatLngBounds();
+      var markers = Object.values(markerMap);
+      for (var i = 0; i < markers.length; i++) {
+          if (markers[i].getPosition())
+              bounds.extend(markers[i].getPosition());
+      }
+      map.fitBounds(bounds);
+  }
+  function closeInfoWindows(infoWindows) {
+      Object.values(infoWindows).forEach(function (infoWindow) { infoWindow.close(); });
+  }
   function renderCollectionToView(viewId, view, fetchedData, template, style) {
-      if (!template.templateFields || !template.templateContent || !fetchedData.templateFields) {
+      if (!template.templateFields || !template.pageContent || !fetchedData.templateFields) {
           console.log(viewId + " will not be rendered because it does not have required template attributes.");
           return;
       }
@@ -15128,13 +16272,13 @@
                   templateMap[field] = currentRow[fetchedData.templateFields[field]].raw_value;
               }
           });
-          var templateContent = template.templateContent;
+          var pageContent = template.pageContent[PageTypes.LIST];
           Object.entries(templateMap).forEach(function (entry) {
               var key = entry[0];
               var value = entry[1];
-              templateContent = templateContent.replaceAll("{{" + key + "}}", value); // todo templating engine will allow pass by map
+              pageContent = pageContent.replaceAll("{{" + key + "}}", value); // todo templating engine will allow pass by map
           });
-          view.innerHTML += templateContent;
+          view.innerHTML += pageContent;
       };
       // ignore the first row in data, since it is assumed to be a label row
       for (var i = 1; i < fetchedData.data.length; i++) {
@@ -15265,6 +16409,14 @@
       if (fetchedData.templateProperties && fetchedData.templateProperties.showLegends && (fetchedData.templateProperties.showLegends.toLowerCase() === "false")) {
           showLegends = false;
       }
+      var stackedBars = false;
+      if (fetchedData.templateProperties && fetchedData.templateProperties.stackedBars && (fetchedData.templateProperties.stackedBars.toLowerCase() === "true")) {
+          stackedBars = true;
+      }
+      var roundedBars = false;
+      if (fetchedData.templateProperties && fetchedData.templateProperties.roundedBars && (fetchedData.templateProperties.roundedBars.toLowerCase() === "true")) {
+          roundedBars = true;
+      }
       var indexAxis = "x";
       if (fetchedData.templateProperties && fetchedData.templateProperties.showVertically && fetchedData.templateProperties.showVertically.toString().toLowerCase() === "true") {
           indexAxis = "y";
@@ -15273,8 +16425,8 @@
       if (style.componentProperties && style.componentProperties.borderWidth)
           borderWidth = Number(style.componentProperties.borderWidth);
       var chartColors = [];
-      if (style.componentProperties && style.componentProperties.chartColors && Array.isArray(style.componentProperties.chartColors))
-          chartColors = style.componentProperties.chartColors;
+      if (style.colorTheme && Array.isArray(style.colorTheme))
+          chartColors = style.colorTheme;
       // if fetchedData view as graph, and properties client component is chart
       var dataMatrix = dataToTableMatrix(fetchedData);
       if (dataMatrix && dataMatrix.length) {
@@ -15291,11 +16443,14 @@
               dataRows.push({
                   label: firstColumnAsLabel ? dataArr[0] : undefined,
                   data: firstColumnAsLabel ? dataArr.slice(1) : dataArr,
+                  // fill: true,
                   borderWidth: borderWidth,
-                  borderColor: chartColors.slice(),
-                  backgroundColor: chartColors.slice()
+                  borderColor: chartColors.length > 0 ? chartColors.slice() : undefined,
+                  backgroundColor: chartColors.length > 0 ? chartColors.slice() : undefined,
+                  borderRadius: roundedBars ? 500 : 0
               });
           }
+          console.log(dataRows);
           var canvas = window.document.createElement("canvas");
           canvas.id = viewId;
           view.appendChild(canvas);
@@ -15307,6 +16462,14 @@
               },
               options: {
                   indexAxis: indexAxis,
+                  scales: {
+                      x: {
+                          stacked: stackedBars,
+                      },
+                      y: {
+                          stacked: stackedBars
+                      }
+                  },
                   plugins: {
                       legend: {
                           display: showLegends
@@ -15336,6 +16499,8 @@
       return index % 2 ? "odd" : "even";
   }
   function rotateArray(arr, reverse) {
+      if (arr.length === 0)
+          return arr;
       if (reverse)
           arr.unshift(arr.pop());
       else

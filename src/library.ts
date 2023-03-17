@@ -1,9 +1,10 @@
 import Chart from 'chart.js/auto';
 import { ChartType } from "chart.js";
-import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache } from "@airjam/types";
+import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes } from "@airjam/types";
+import {Loader, LoaderOptions} from "google-maps";
 
-const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
-//const SERVING_DATA_URL: string = "https://localhost:3001/s/data?id=";
+//const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
+const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 const PAGINATION_SHOW_SIZE: number = 7;
 let currentPage: {[id: string]: number} = {}; // global variable that keeps track of current page.
 
@@ -38,6 +39,8 @@ export default function fetchAndRenderData() {
             case ViewType.Gallery:
               renderCollectionToView(viewId, view, fetchedData, template, style);
               break;
+            case ViewType.Map:
+              renderMapToView(viewId, view, fetchedData, template, style);
             default:
               // not yet implemented
           }
@@ -67,6 +70,8 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
           case ViewType.Gallery:
             renderCollectionToView(viewId, view, fetchedData, template, style);
             break;
+          case ViewType.Map:
+            renderMapToView(viewId, view, fetchedData, template, style);
           default:
             // not yet implemented
         }
@@ -75,8 +80,161 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
   }
 }
 
+function renderMapToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
+  if (!template.templateFields || !fetchedData.templateFields) {
+    console.log(viewId + " will not be rendered because it does not have required template attributes.");
+    return;
+  }
+
+  // make the control section. do not add things directly to the controlElement, instead, create a wrapper div on top of control element to add things to the control pane
+  const controlElement = window.document.createElement("div");
+  controlElement.className = "map-control";
+  view.appendChild(controlElement);
+
+  // make the map section
+  const options: LoaderOptions = {/* todo */};
+  const loader = new Loader("AIzaSyA8xMW1giwvraqrUpM7bLQeURGjr5VUrBw", options);
+  loader.load().then(function (google) {
+    const mapElement = window.document.createElement("div");
+    mapElement.className = "map-container";
+    view.appendChild(mapElement);
+    const map = new google.maps.Map(mapElement, {
+        zoom: 9,
+        zoomControl: false,
+        panControl: false,
+        scaleControl: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: style.jsonContent ? style.jsonContent : []
+    });
+
+    const geocoder = new google.maps.Geocoder();
+
+    // three associative maps below are used to associate between markers and their info windows and their container items
+    let markers: {[index: number]: google.maps.Marker} = {};
+    let infoWindows: {[index: number]: google.maps.InfoWindow} = {};
+    let containerElements: {[index: number]: HTMLDivElement | string} = {};
+
+    if (fetchedData.templateFields["location"]) {
+      const locationField = fetchedData.templateFields["location"];
+      fetchedData.data.forEach((currentDataRow: {[id: string]: dataField}, index: number) => {
+        if (index === 0) {
+          return;
+        }
+        if (currentDataRow[locationField]) {
+          let locationData = currentDataRow[locationField];
+          if (locationData.display_as === DataSourceFieldType.Address) {
+            // geocode then add to map
+            geocoder.geocode({address: locationData.raw_value}, function(results, status) {
+              if (status === 'OK') {
+                map.setCenter(results[0].geometry.location);
+
+                const templateMap: {[id: string]: string} = {};
+                Object.keys(template.templateFields).forEach((field: string) => {
+                  if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
+                    templateMap[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
+                  }
+                });
+                const entryElement = window.document.createElement("div");
+                entryElement.className = "map-control-entry";
+                entryElement.id = viewId + ".map.entry." + index;
+
+                let containerPageContent = template.pageContent[PageTypes.LIST];
+                containerPageContent = containerPageContent.replaceAll( "{{index}}", index);
+                Object.entries(templateMap).forEach((entry: any[]) => {
+                  const key = entry[0];
+                  const value = entry[1];
+                  containerPageContent = containerPageContent.replaceAll( "{{" + key + "}}", value);
+                });
+                entryElement.innerHTML += containerPageContent;
+                containerElements[index] = entryElement;
+                populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
+
+                let markerPageContent = template.pageContent[PageTypes.MARKER];
+                markerPageContent = markerPageContent.replaceAll( "{{index}}", index);
+                Object.entries(templateMap).forEach((entry: any[]) => {
+                  const key = entry[0];
+                  const value = entry[1];
+                  markerPageContent = markerPageContent.replaceAll( "{{" + key + "}}", value);
+                });
+
+                // set up info window
+                const infoWindow = new google.maps.InfoWindow({
+                  content: markerPageContent,
+                });
+                infoWindows[index] = infoWindow;
+
+                let marker = new google.maps.Marker({
+                  map: map,
+                  position: results[0].geometry.location,
+                  label: index.toString()
+                });
+                markers[index] = marker;
+
+                entryElement.addEventListener("mouseover", e => {
+                  map.panTo(results[0].geometry.location);
+                  closeInfoWindows(infoWindows);
+                  if (infoWindows[index]) infoWindows[index].open(map, marker);
+                });
+                marker.addListener("click", () => {
+                  closeInfoWindows(infoWindows);
+                  infoWindow.open(map, marker);
+                  let topPos = entryElement.offsetTop;
+                  controlElement.scrollTop = topPos;
+                });
+                updateMapBoundToFit(map, markers);
+              } else {
+                console.log("geocode was unsuccessful:" + status);
+                console.log(currentDataRow);
+                containerElements[index] = "failed";
+              }
+            });
+          } else {
+            console.log("will not display this row: ");
+            console.log(currentDataRow);
+            containerElements[index] = "failed";
+          }
+        } else {
+          containerElements[index] = "failed";
+        }
+      });
+    }
+  });
+}
+
+// Warning: This is a destructive rendering function for the containerElement.
+function populateContainerElementsIfFull(fullCount: number, containerElement: HTMLDivElement, containerElements: {[index: number]: HTMLDivElement | string}) {
+  if (Object.keys(containerElements).length !== fullCount) {
+    return;
+  }
+  containerElement.innerHTML = ""; //remove all child node and clear container for new elements.
+  Object.keys(containerElements).map((sKey) => parseInt(sKey)).sort((a,b)=> a - b).forEach((key) => {
+    if ((typeof containerElements[key]) !== (typeof "")) {
+      containerElement.appendChild(containerElements[key] as HTMLDivElement);
+    } else {
+      console.log(key + " is not renderable");
+      console.log(typeof containerElements[key]);
+      console.log(containerElements[key]);
+    }
+  });
+}
+
+function updateMapBoundToFit(map: google.maps.Map, markerMap: {[index: number]: google.maps.Marker}) {
+    let bounds = new google.maps.LatLngBounds();
+    const markers = Object.values(markerMap);
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].getPosition())  bounds.extend(markers[i].getPosition()!);
+    }
+    map.fitBounds(bounds);
+}
+
+function closeInfoWindows(infoWindows: {[index: number]: google.maps.InfoWindow}) {
+  Object.values(infoWindows).forEach((infoWindow) => { infoWindow.close(); });
+}
+
 function renderCollectionToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
-  if (!template.templateFields || !template.templateContent || !fetchedData.templateFields) {
+  if (!template.templateFields || !template.pageContent || !fetchedData.templateFields) {
     console.log(viewId + " will not be rendered because it does not have required template attributes.");
     return;
   }
@@ -90,13 +248,13 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: tabl
       }
     });
 
-    let templateContent = template.templateContent;
+    let pageContent = template.pageContent[PageTypes.LIST];
     Object.entries(templateMap).forEach((entry: any[]) => {
       const key = entry[0];
       const value = entry[1];
-      templateContent = templateContent.replaceAll( "{{" + key + "}}", value); // todo templating engine will allow pass by map
+      pageContent = pageContent.replaceAll( "{{" + key + "}}", value); // todo templating engine will allow pass by map
     });
-    view.innerHTML += templateContent;
+    view.innerHTML += pageContent;
     }
     if (fetchedData.paginationStyle === PaginationStyle.Paged) {
       renderPagination(viewId, view, fetchedData);
@@ -216,6 +374,14 @@ function renderChartToView(viewId: string, view: Element, fetchedData: tableView
   if (fetchedData.templateProperties && fetchedData.templateProperties.showLegends && (fetchedData.templateProperties.showLegends.toLowerCase() === "false")) {
     showLegends = false;
   }
+  let stackedBars: boolean = false;
+  if (fetchedData.templateProperties && fetchedData.templateProperties.stackedBars && (fetchedData.templateProperties.stackedBars.toLowerCase() === "true")) {
+    stackedBars = true;
+  }
+  let roundedBars: boolean = false;
+  if (fetchedData.templateProperties && fetchedData.templateProperties.roundedBars && (fetchedData.templateProperties.roundedBars.toLowerCase() === "true")) {
+    roundedBars = true;
+  }
   let indexAxis: "x" | "y" = "x";
   if (fetchedData.templateProperties && fetchedData.templateProperties.showVertically && fetchedData.templateProperties.showVertically.toString().toLowerCase() === "true") {
     indexAxis = "y";
@@ -223,7 +389,7 @@ function renderChartToView(viewId: string, view: Element, fetchedData: tableView
   let borderWidth = 0;
   if (style.componentProperties && style.componentProperties.borderWidth) borderWidth = Number(style.componentProperties.borderWidth);
   let chartColors: string[] = [];
-  if (style.componentProperties && style.componentProperties.chartColors && Array.isArray(style.componentProperties.chartColors)) chartColors = style.componentProperties.chartColors;
+  if (style.colorTheme && Array.isArray(style.colorTheme)) chartColors = style.colorTheme;
 
   // if fetchedData view as graph, and properties client component is chart
   const dataMatrix = dataToTableMatrix(fetchedData);
@@ -241,11 +407,14 @@ function renderChartToView(viewId: string, view: Element, fetchedData: tableView
       dataRows.push({
           label: firstColumnAsLabel ? dataArr[0] : undefined,
           data: firstColumnAsLabel ? dataArr.slice(1) : dataArr,
+          // fill: true,
           borderWidth: borderWidth,
-          borderColor: chartColors.slice(),
-          backgroundColor: chartColors.slice()
+          borderColor: chartColors.length > 0 ? chartColors.slice() : undefined,
+          backgroundColor: chartColors.length > 0 ? chartColors.slice() : undefined,
+          borderRadius: roundedBars ? 500 : 0
       });
     }
+    console.log(dataRows);
     let canvas = window.document.createElement("canvas");
     canvas.id = viewId;
     view.appendChild(canvas);
@@ -257,6 +426,14 @@ function renderChartToView(viewId: string, view: Element, fetchedData: tableView
       },
       options: {
         indexAxis: indexAxis,
+        scales: {
+          x: {
+            stacked: stackedBars,
+          },
+          y: {
+            stacked: stackedBars
+          }
+        },
         plugins: {
           legend: {
             display: showLegends
@@ -293,6 +470,7 @@ function evenOrOdd(index: number): string {
 }
 
 function rotateArray(arr: any[], reverse: boolean): any[] {
+  if (arr.length === 0) return arr;
   if (reverse) arr.unshift(arr.pop());
   else arr.push(arr.shift());
   return arr;
