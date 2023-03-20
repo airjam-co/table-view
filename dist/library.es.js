@@ -16034,8 +16034,8 @@ class Loader {
 }
 Loader.CALLBACK_NAME = '_dk_google_maps_loader_cb';
 
-//const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
-var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
+var SERVING_DATA_URL = "https://airjam.co/s/data?id=";
+//const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 var PAGINATION_SHOW_SIZE = 7;
 var currentPage = {}; // global variable that keeps track of current page.
 function fetchAndRenderData() {
@@ -16230,7 +16230,6 @@ function populateContainerElementsIfFull(fullCount, containerElement, containerE
     }
     containerElement.innerHTML = ""; //remove all child node and clear container for new elements.
     Object.keys(containerElements).map(function (sKey) { return parseInt(sKey); }).sort(function (a, b) { return a - b; }).forEach(function (key) {
-        console.log(key);
         if ((typeof containerElements[key]) !== (typeof "")) {
             containerElement.appendChild(containerElements[key]);
         }

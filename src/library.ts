@@ -3,8 +3,8 @@ import { ChartType } from "chart.js";
 import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes } from "@airjam/types";
 import {Loader, LoaderOptions} from "google-maps";
 
-//const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
-const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
+const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
+//const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 const PAGINATION_SHOW_SIZE: number = 7;
 let currentPage: {[id: string]: number} = {}; // global variable that keeps track of current page.
 
