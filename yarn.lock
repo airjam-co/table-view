@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@airjam/types@^0.0.71":
-  version "0.0.72"
-  resolved "https://registry.yarnpkg.com/@airjam/types/-/types-0.0.71.tgz#0695b540a160daf5d41da42d7f2f67813a3c0940"
-  integrity sha512-K3p77do8z0m2c8fn2wrOcrbCpfkiXrJYrna+Xqfe9iG7EILhjEFOY3Qj8N6m80/dV7h3X8Z85PoSrxPLDWLLsg==
+"@airjam/types@^0.0.74":
+  version "0.0.75"
+  resolved "https://registry.yarnpkg.com/@airjam/types/-/types-0.0.74.tgz#e587c2875fd52bd4f92a3cef6c7cd78dcdb834c4"
+  integrity sha512-jhKqLrP7s4LU7eXMQabNW7pwUJBbgiSqYY/zpJBbP6MZJGWcO1SgA5+sW8rC7Q2+LCGDO0y4j6a3vHwiz3q2qA==
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.1"
