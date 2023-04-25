@@ -3,8 +3,8 @@ import { ChartType } from "chart.js";
 import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes } from "@airjam/types";
 import {Loader, LoaderOptions} from "google-maps";
 
-const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
-//const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
+//const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
+const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 const PAGINATION_SHOW_SIZE: number = 7;
 let currentPage: {[id: string]: number} = {}; // global variable that keeps track of current page.
 
@@ -98,6 +98,9 @@ function renderMapToView(viewId: string, view: Element, fetchedData: tableViewRe
     const mapElement = window.document.createElement("div");
     mapElement.className = "map-container";
     view.appendChild(mapElement);
+    if (fetchedData.paginationStyle === PaginationStyle.Paged) {
+      renderPagination(viewId, view, fetchedData);
+    }
     const map = new google.maps.Map(mapElement, {
         zoom: 9,
         zoomControl: false,
@@ -126,70 +129,72 @@ function renderMapToView(viewId: string, view: Element, fetchedData: tableViewRe
           let locationData = currentDataRow[locationField];
           if (locationData.display_as === DataSourceFieldType.Address) {
             // geocode then add to map
-            geocoder.geocode({address: locationData.raw_value}, function(results, status) {
-              if (status === 'OK') {
-                map.setCenter(results[0].geometry.location);
+            // random waiting added because google geocode rate limits
+            setTimeout( () => {
+              geocoder.geocode({address: locationData.raw_value}, function(results, status) {
+                if (status === 'OK') {
+                  map.setCenter(results[0].geometry.location);
 
-                const templateMap: {[id: string]: string} = {};
-                Object.keys(template.templateFields).forEach((field: string) => {
-                  if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
-                    templateMap[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
-                  }
-                });
-                const entryElement = window.document.createElement("div");
-                entryElement.className = "map-control-entry";
-                entryElement.id = viewId + ".map.entry." + index;
+                  const templateMap: {[id: string]: string} = {};
+                  Object.keys(template.templateFields).forEach((field: string) => {
+                    if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
+                      templateMap[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
+                    }
+                  });
+                  const entryElement = window.document.createElement("div");
+                  entryElement.className = "map-control-entry";
+                  entryElement.id = viewId + ".map.entry." + index;
 
-                let containerPageContent = template.pageContent[PageTypes.LIST];
-                containerPageContent = containerPageContent.replaceAll( "{{index}}", index);
-                Object.entries(templateMap).forEach((entry: any[]) => {
-                  const key = entry[0];
-                  const value = entry[1];
-                  containerPageContent = containerPageContent.replaceAll( "{{" + key + "}}", value);
-                });
-                entryElement.innerHTML += containerPageContent;
-                containerElements[index] = entryElement;
-                populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
+                  let containerPageContent = template.pageContent[PageTypes.LIST];
+                  containerPageContent = containerPageContent.replaceAll( "{{index}}", index);
+                  Object.entries(templateMap).forEach((entry: any[]) => {
+                    const key = entry[0];
+                    const value = entry[1];
+                    containerPageContent = containerPageContent.replaceAll( "{{" + key + "}}", value);
+                  });
+                  entryElement.innerHTML += containerPageContent;
+                  containerElements[index] = entryElement;
+                  populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
 
-                let markerPageContent = template.pageContent[PageTypes.MARKER];
-                markerPageContent = markerPageContent.replaceAll( "{{index}}", index);
-                Object.entries(templateMap).forEach((entry: any[]) => {
-                  const key = entry[0];
-                  const value = entry[1];
-                  markerPageContent = markerPageContent.replaceAll( "{{" + key + "}}", value);
-                });
+                  let markerPageContent = template.pageContent[PageTypes.MARKER];
+                  markerPageContent = markerPageContent.replaceAll( "{{index}}", index);
+                  Object.entries(templateMap).forEach((entry: any[]) => {
+                    const key = entry[0];
+                    const value = entry[1];
+                    markerPageContent = markerPageContent.replaceAll( "{{" + key + "}}", value);
+                  });
 
-                // set up info window
-                const infoWindow = new google.maps.InfoWindow({
-                  content: markerPageContent,
-                });
-                infoWindows[index] = infoWindow;
+                  // set up info window
+                  const infoWindow = new google.maps.InfoWindow({
+                    content: markerPageContent,
+                  });
+                  infoWindows[index] = infoWindow;
 
-                let marker = new google.maps.Marker({
-                  map: map,
-                  position: results[0].geometry.location,
-                  label: index.toString()
-                });
-                markers[index] = marker;
+                  let marker = new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location,
+                    label: index.toString()
+                  });
+                  markers[index] = marker;
 
-                entryElement.addEventListener("mouseover", e => {
-                  map.panTo(results[0].geometry.location);
-                  closeInfoWindows(infoWindows);
-                  if (infoWindows[index]) infoWindows[index].open(map, marker);
-                });
-                marker.addListener("click", () => {
-                  closeInfoWindows(infoWindows);
-                  infoWindow.open(map, marker);
-                  let topPos = entryElement.offsetTop;
-                  controlElement.scrollTop = topPos;
-                });
-                updateMapBoundToFit(map, markers);
-              } else {
-                console.log("geocode was unsuccessful:" + status);
-                console.log(currentDataRow);
-                containerElements[index] = "failed";
-              }
-            });
+                  entryElement.addEventListener("mouseover", e => {
+                    map.panTo(results[0].geometry.location);
+                    closeInfoWindows(infoWindows);
+                    if (infoWindows[index]) infoWindows[index].open(map, marker);
+                  });
+                  marker.addListener("click", () => {
+                    closeInfoWindows(infoWindows);
+                    infoWindow.open(map, marker);
+                    let topPos = entryElement.offsetTop;
+                    controlElement.scrollTop = topPos;
+                  });
+                  updateMapBoundToFit(map, markers);
+                } else {
+                  console.log("geocode was unsuccessful:" + status);
+                  containerElements[index] = "failed";
+                }
+              });
+            }, Math.floor(Math.random() * 100));
           } else {
             console.log("will not display this row: ");
             console.log(currentDataRow);
@@ -239,8 +244,10 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: tabl
     return;
   }
   // ignore the first row in data, since it is assumed to be a label row
+  console.log(fetchedData);
   for (let i = 1; i < fetchedData.data.length; i++) {
     const currentRow = fetchedData.data[i];
+    console.log(currentRow);
     const templateMap: {[id: string]: string} = {};
     Object.keys(template.templateFields).forEach((field: string) => {
       if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
@@ -289,6 +296,7 @@ function makePageLink(viewId: string, view: Element, pageNumber: number, linkTex
   if (currentPage[viewId] === pageNumber) {
     const textElement = window.document.createElement("span");
     textElement.innerText = pageNumber.toString();
+    textElement.className = "currentPage";
     if (linkText) textElement.innerText = linkText;
     return textElement;
   } else {

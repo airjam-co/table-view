@@ -580,7 +580,7 @@ class Color {
 }
 
 /*!
- * Chart.js v4.2.0
+ * Chart.js v4.2.1
  * https://www.chartjs.org
  * (c) 2023 Chart.js Contributors
  * Released under the MIT License
@@ -3176,7 +3176,7 @@ function styleChanged(style, prevStyle) {
 }
 
 /*!
- * Chart.js v4.2.0
+ * Chart.js v4.2.1
  * https://www.chartjs.org
  * (c) 2023 Chart.js Contributors
  * Released under the MIT License
@@ -6769,6 +6769,7 @@ function determineMaxTicks(scale) {
 
 const reverseAlign = (align)=>align === 'left' ? 'right' : align === 'right' ? 'left' : align;
 const offsetFromEdge = (scale, edge, offset)=>edge === 'top' || edge === 'left' ? scale[edge] + offset : scale[edge] - offset;
+const getTicksLimit = (ticksLength, maxTicksLimit)=>Math.min(maxTicksLimit || ticksLength, ticksLength);
  function sample(arr, numItems) {
     const result = [];
     const increment = arr.length / numItems;
@@ -7163,7 +7164,7 @@ class Scale extends Element {
     calculateLabelRotation() {
         const options = this.options;
         const tickOpts = options.ticks;
-        const numTicks = this.ticks.length;
+        const numTicks = getTicksLimit(this.ticks.length, options.ticks.maxTicksLimit);
         const minRotation = tickOpts.minRotation || 0;
         const maxRotation = tickOpts.maxRotation;
         let labelRotation = minRotation;
@@ -7321,18 +7322,19 @@ class Scale extends Element {
             if (sampleSize < ticks.length) {
                 ticks = sample(ticks, sampleSize);
             }
-            this._labelSizes = labelSizes = this._computeLabelSizes(ticks, ticks.length);
+            this._labelSizes = labelSizes = this._computeLabelSizes(ticks, ticks.length, this.options.ticks.maxTicksLimit);
         }
         return labelSizes;
     }
- _computeLabelSizes(ticks, length) {
+ _computeLabelSizes(ticks, length, maxTicksLimit) {
         const { ctx , _longestTextCache: caches  } = this;
         const widths = [];
         const heights = [];
+        const increment = Math.floor(length / getTicksLimit(length, maxTicksLimit));
         let widestLabelSize = 0;
         let highestLabelSize = 0;
         let i, j, jlen, label, tickFont, fontString, cache, lineHeight, width, height, nestedLabel;
-        for(i = 0; i < length; ++i){
+        for(i = 0; i < length; i += increment){
             label = ticks[i].label;
             tickFont = this._resolveTickFontOptions(i);
             ctx.font = fontString = tickFont.string;
@@ -8638,7 +8640,7 @@ function needContext(proxy, names) {
     return false;
 }
 
-var version = "4.2.0";
+var version = "4.2.1";
 
 const KNOWN_POSITIONS = [
     'top',
@@ -9802,8 +9804,7 @@ class ArcElement extends Element {
             'startAngle',
             'endAngle',
             'innerRadius',
-            'outerRadius',
-            'circumference'
+            'outerRadius'
         ], useFinalPosition);
         const { offset , spacing  } = this.options;
         const halfAngle = (startAngle + endAngle) / 2;
@@ -10577,6 +10578,9 @@ function cleanDecimatedDataset(dataset) {
         delete dataset._decimated;
         delete dataset._data;
         Object.defineProperty(dataset, 'data', {
+            configurable: true,
+            enumerable: true,
+            writable: true,
             value: data
         });
     }
@@ -14511,7 +14515,15 @@ var ViewType;
     ViewType["Graph"] = "view_graph";
     ViewType["Table"] = "view_table";
     ViewType["Map"] = "view_map";
+    ViewType["Nearby"] = "view_nearby";
 })(ViewType || (ViewType = {}));
+var CodingLanguages;
+(function (CodingLanguages) {
+    CodingLanguages["Javascript"] = "javascript";
+    CodingLanguages["Typescript"] = "typescript";
+    CodingLanguages["React"] = "react";
+    CodingLanguages["ReactNative"] = "react_native";
+})(CodingLanguages || (CodingLanguages = {}));
 var PaginationStyle;
 (function (PaginationStyle) {
     PaginationStyle["Paged"] = "pagination_paged";
@@ -14535,8 +14547,20 @@ var SortBy;
     SortBy["RECENT"] = "recent";
     SortBy["OLDEST"] = "oldest";
 })(SortBy || (SortBy = {}));
+var QueryType;
+(function (QueryType) {
+    QueryType["EXACT"] = "exact";
+    QueryType["KEYWORD"] = "keyword";
+})(QueryType || (QueryType = {}));
+var QueryOperator;
+(function (QueryOperator) {
+    QueryOperator["AND"] = "and";
+    QueryOperator["OR"] = "or";
+    QueryOperator["NOT"] = "not";
+})(QueryOperator || (QueryOperator = {}));
 var PageTypes;
 (function (PageTypes) {
+    PageTypes["LANDING"] = "LANDING";
     PageTypes["LIST"] = "LIST";
     PageTypes["DETAIL"] = "DETAIL";
     PageTypes["EDIT"] = "EDIT";
@@ -14549,6 +14573,7 @@ var template_cache = {
         shortId: "card_list",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.List, ViewType.Gallery],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Card List",
         ownerId: "",
         version: 1,
@@ -14592,6 +14617,7 @@ var template_cache = {
         shortId: "standard_table",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Table],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Table",
         ownerId: "",
         version: 1,
@@ -14616,6 +14642,7 @@ var template_cache = {
         shortId: "barchart",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Graph],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Bar Chart",
         ownerId: "",
         version: 1,
@@ -14666,6 +14693,7 @@ var template_cache = {
         shortId: "piechart",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Graph],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Pie Chart",
         ownerId: "",
         version: 1,
@@ -14698,6 +14726,7 @@ var template_cache = {
         shortId: "doughnutchart",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Graph],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Doughnut Chart",
         ownerId: "",
         version: 1,
@@ -14730,6 +14759,7 @@ var template_cache = {
         shortId: "linechart",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Graph],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Line Chart",
         ownerId: "",
         version: 1,
@@ -14774,6 +14804,7 @@ var template_cache = {
         shortId: "formal_menu",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.List],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Formal Menu",
         ownerId: "",
         version: 1,
@@ -14807,6 +14838,7 @@ var template_cache = {
         shortId: "graphic_menu",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Gallery],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Graphic Menu",
         ownerId: "",
         version: 1,
@@ -14845,6 +14877,7 @@ var template_cache = {
         shortId: "job_postings",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.List],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
         name: "Job Postings",
         ownerId: "",
         version: 1,
@@ -14873,22 +14906,52 @@ var template_cache = {
         },
         componentProperties: {}
     },
+    "faq": {
+        _id: "",
+        shortId: "faq",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.List],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
+        name: "Frequently Asked Questions",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/faq.png"],
+        description: "This template displays each row of data as a questions and answers format.",
+        visibility: "PUBLIC",
+        pages: [PageTypes.LIST],
+        properties: {},
+        pageContent: { "LIST": "<li><input type='checkbox' checked><i></i><h1 class='question'>{{question}}</h1><p>{{answer}}</p></li>" },
+        templateFields: {
+            question: {
+                name: "Question",
+                description: "Question",
+                compatibleTypes: [], //empty for all
+            },
+            answer: {
+                name: "Answer",
+                description: "Answer",
+                compatibleTypes: []
+            }
+        },
+        componentProperties: {}
+    },
     "store_locator": {
         _id: "",
         shortId: "store_locator",
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.Map],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript],
         name: "Store Locator",
         ownerId: "",
         version: 1,
-        previewImageUrls: ["/images/templates/job_postings.png"],
+        previewImageUrls: ["/images/templates/store_locator.png"],
         description: "This template displays each row of data as a pinpoint on a map.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST, PageTypes.MARKER],
         properties: {},
         pageContent: {
-            "LIST": "<div class='container'><span class='label'>{{index}}. {{label}}</span><span class='description'>{{description}}</span><span class='location'>{{location}}</span><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a></div>",
-            "MARKER": "<div class='container'><span class='label'>{{index}}. {{label}}</span><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a></div>"
+            "LIST": "<div class='container'><span class='label'>{{index}}. {{label}}</span><span class='image'><img src='{{image}}'/></span><span class='description'>{{description}}</span><span class='location'><i class='fa-solid fa-map-pin icon'></i>{{location}}</span><span class='callouts'><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a><a class='callout' href='{{calloutLink2}}'>{{calloutLinkText2}}</a></span></div>",
+            "MARKER": "<div class='marker'><span class='label'>{{label}}</span><span class='location'><i class='fa-solid fa-map-pin icon'></i>{{location}}</span><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a></div>"
         },
         templateFields: {
             label: {
@@ -14934,6 +14997,78 @@ var template_cache = {
             calloutLinkText2: {
                 name: "Second Callout Link Text",
                 description: "(Optional) Text for the second link to call out to",
+                compatibleTypes: [],
+            }
+        },
+        componentProperties: {}
+    },
+    "self_tour": {
+        _id: "",
+        shortId: "self_tour",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Nearby],
+        compatibleLanguages: [CodingLanguages.ReactNative],
+        name: "Self-Guided tours",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/store_locator.png"],
+        description: "This template vends self-guided tour content for mobile devices.",
+        visibility: "PUBLIC",
+        pages: [PageTypes.LANDING, PageTypes.DETAIL],
+        properties: {
+            autoPlayAudio: {
+                name: "Autoplay audio",
+                description: "Auto-play audio content when detail page is triggered",
+                default: true,
+                type: "BOOLEAN"
+            },
+            lookupInterface: {
+                name: "Lookup interface",
+                description: "Lookup interface",
+                default: undefined,
+                type: "MULTI",
+                values: [
+                    { key: "NUMERIC", text: "Numeric", value: "NUMERIC" },
+                    { key: "QR", text: "QR Code", value: "QR" },
+                    { key: "BLE", text: "iBeacon", value: "BLE" },
+                ]
+            },
+            iBeaconUuid: {
+                name: "iBeacon UUID",
+                description: "iBeacon's proximity UUID to distinguish beacons in your network",
+                default: "",
+                type: "TEXT"
+            },
+            sheetHeight: {
+                name: "Popup height (%)",
+                description: "Height of the pop up sheet with respect to the height of the user's device (0 to 100)",
+                default: "50",
+                type: "NUMBER"
+            }
+        },
+        pageContent: {
+            "LANDING": "<div class='container'><span class='heading'>Move closer to an item or enter an item number to view</span></div>",
+            "DETAIL": "<div class='container'><span class='image' style='background-image: url(\"{{image}}\");'><span class='audio'><audio controls autoplay><source src='{{audio}}' /></audio></span></span><span class='label'>{{label}}</span><span class='description'>{{description}}</span></div>"
+        },
+        templateFields: {
+            label: {
+                name: "Label",
+                description: "Label of the artifact",
+                compatibleTypes: [],
+            },
+            image: {
+                name: "Image",
+                description: "Link to the the main image of the artifact",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            audio: {
+                name: "Audio",
+                description: "Link to the audio description of the artifact",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            description: {
+                name: "Description",
+                description: "Description of the point of interest",
                 compatibleTypes: [],
             }
         },
@@ -15050,7 +15185,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Minimalistic look and feel for gallery-typed templates.",
         visibility: "PUBLIC",
-        style: ".concise_gallery .container { display: inline-grid; padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 10px; margin: 5px; } .concise_gallery .container .title { font-size: 1.2 rem; font-weight: 600; }  .concise_gallery .container .image img { width: 100% } .concise_gallery .container .description { display: block } .concise_gallery .pagination a, .concise_gallery .pagination span { margin: 2px; padding: 3px; }",
+        style: ".concise_gallery .container { display: inline-grid; padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 10px; margin: 5px; } .concise_gallery .container .title { font-size: 1.2 rem; font-weight: 600; }  .concise_gallery .container .image img { width: 100% } .concise_gallery .container .description { display: block } .concise_gallery .pagination a, .concise_gallery .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["concise_gallery"],
         colorTheme: ["#ddd"],
         properties: {},
@@ -15066,7 +15201,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Traditional look and feel for menu templates.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Castoro&display=swap'); .fine_dining .container { font-family: 'Castoro', serif; display: block; padding: 10px; text-align: center } .fine_dining .container .name { font-size: 20px; }  .fine_dining .container .price { font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .fine_dining .container .description { display: block } .fine_dining .pagination a, .fine_dining .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Castoro&display=swap'); .fine_dining .container { font-family: 'Castoro', serif; display: block; padding: 10px; text-align: center } .fine_dining .container .name { font-size: 20px; }  .fine_dining .container .price { font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .fine_dining .container .description { display: block } .fine_dining .pagination a, .fine_dining .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["fine_dining"],
         colorTheme: ["#000"],
         properties: {},
@@ -15082,7 +15217,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Modern look and feel for fine dining menu templates.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Tenor+Sans&display=swap'); .contemporary_fine_dining .container { display: block; padding: 10px; text-align: center } .contemporary_fine_dining .container .name { font-family: 'Tenor Sans', sans-serif; font-size: 20px; } .contemporary_fine_dining .container .price { font-family: 'Tenor Sans', sans-serif; font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .contemporary_fine_dining .container .description { font-family: 'Playfair Display', serif; font-style: italic; display: block } .contemporary_fine_dining .pagination a, .contemporary_fine_dining .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Tenor+Sans&display=swap'); .contemporary_fine_dining .container { display: block; padding: 10px; text-align: center } .contemporary_fine_dining .container .name { font-family: 'Tenor Sans', sans-serif; font-size: 20px; } .contemporary_fine_dining .container .price { font-family: 'Tenor Sans', sans-serif; font-size: 18px; display: block; margin-top: 5px; margin-bottom: 10px } .contemporary_fine_dining .container .description { font-family: 'Playfair Display', serif; font-style: italic; display: block } .contemporary_fine_dining .pagination a, .contemporary_fine_dining .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["contemporary_fine_dining"],
         colorTheme: ["#000"],
         properties: {},
@@ -15098,7 +15233,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Vibrant style for graphic menu templates with emphasis on item image.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .healthy_five .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Open Sans', sans-serif; } .healthy_five .container .image img { display: block; max-width: 100%; height: auto; margin: 10px 0 5px 0; } .healthy_five .container .name { font-size: 20px; } .healthy_five .container .price { font-size: 18px; display: block; } .healthy_five .container .description { display: block } .healthy_five .pagination a, .healthy_five .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .healthy_five .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Open Sans', sans-serif; } .healthy_five .container .image img { display: block; max-width: 100%; height: auto; margin: 10px 0 5px 0; } .healthy_five .container .name { font-size: 20px; } .healthy_five .container .price { font-size: 18px; display: block; } .healthy_five .container .description { display: block } .healthy_five .pagination a, .healthy_five .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["healthy_five"],
         colorTheme: ["#000"],
         properties: {},
@@ -15114,7 +15249,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Graphic menu templates with container boxes around each menu item.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_boxes .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_boxes .container .image { object-fit: cover; } .menu_boxes .container .image img { display: block; width: 100%; height: 200px; margin: 5px 0 5px 0; } .menu_boxes .container .name { font-size: 16px; } .menu_boxes .container .price { font-size: 14px; display: block; } .menu_boxes .container .description { display: block; font-size: 14px; } .menu_boxes .pagination a, .menu_boxes .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_boxes .container { display: inline-block; width: 300px; padding: 10px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_boxes .container .image { object-fit: cover; } .menu_boxes .container .image img { display: block; width: 100%; height: 200px; margin: 5px 0 5px 0; } .menu_boxes .container .name { font-size: 16px; } .menu_boxes .container .price { font-size: 14px; display: block; } .menu_boxes .container .description { display: block; font-size: 14px; } .menu_boxes .pagination a, .menu_boxes .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["menu_boxes"],
         colorTheme: ["#efefef", "#000"],
         properties: {},
@@ -15130,7 +15265,7 @@ var style_cache = {
         previewImageUrls: [],
         description: "Graphic menu templates with stacked container boxes displayed like a list.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_box_list .container { display: inline-block; width: 400px; height: 100px; padding: 5px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_box_list .container .image { height: 100px; float: right; } .menu_box_list .container .image img { display: block; width: 100px; height: 100px; object-fit: cover; } .menu_box_list .container .name { font-size: 16px; margin-bottom: 5px; } .menu_box_list .container .price { font-size: 14px; display: block; margin-bottom: 10px } .menu_box_list .container .description { display: block; font-size: 14px; } .menu_box_list .pagination a, .menu_box_list .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap'); .menu_box_list .container { display: inline-block; width: 400px; height: 100px; padding: 5px; font-family: 'Roboto Slab', serif; border: 1px solid #efefef; border-radius: 5px; margin: 5px; } .menu_box_list .container .image { height: 100px; float: right; } .menu_box_list .container .image img { display: block; width: 100px; height: 100px; object-fit: cover; } .menu_box_list .container .name { font-size: 16px; margin-bottom: 5px; } .menu_box_list .container .price { font-size: 14px; display: block; margin-bottom: 10px } .menu_box_list .container .description { display: block; font-size: 14px; } .menu_box_list .pagination a, .menu_box_list .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["menu_box_list"],
         colorTheme: ["#efefef", "#000"],
         properties: {},
@@ -15146,9 +15281,57 @@ var style_cache = {
         previewImageUrls: [],
         description: "Plain job postings style.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .job_posting_plain .container a { color: #000; text-decoration: none; } .job_posting_plain .container a:hover { text-decoration: underline; } .job_posting_plain .container { display: block; font-family: 'Open Sans', sans-serif; border-top: 1px solid #aaa; margin: 5px 0 5px 0; padding: 15px 0 15px 0; } .job_posting_plain .container .title { font-size: 20px; margin-bottom: 5px; } .job_posting_plain .container .description { display: block; font-size: 16px; } .job_posting_plain .pagination a, .job_posting_plain .pagination span { margin: 2px; padding: 3px; }",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .job_posting_plain .container a { color: #000; text-decoration: none; } .job_posting_plain .container a:hover { text-decoration: underline; } .job_posting_plain .container { display: block; font-family: 'Open Sans', sans-serif; border-top: 1px solid #aaa; margin: 5px 0 5px 0; padding: 15px 0 15px 0; } .job_posting_plain .container .title { font-size: 20px; margin-bottom: 5px; } .job_posting_plain .container .description { display: block; font-size: 16px; } .job_posting_plain .pagination a, .job_posting_plain .pagination .currentPage { margin: 2px; padding: 3px; }",
         containerClassNames: ["job_posting_plain"],
         colorTheme: ["#fff", "#000", "#aaa"],
+        properties: {},
+        componentProperties: {}
+    },
+    "faq_plain": {
+        _id: "",
+        shortId: "faq_plain",
+        name: "Plain",
+        compatibleWith: ["faq"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Standard FAQ style.",
+        visibility: "PUBLIC",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .faq_plain .transition, ul li i:before, ul li i:after, p { transition: all 0.25s ease-in-out; } .faq_plain .flipIn, ul li, h1 { animation: flipdown 0.5s ease both; } .faq_plain .no-select, .question { -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; font-family: 'Open Sans', sans-serif; font-size: 20px; font-weight: 500; margin: 0; } .faq_plain p { overflow: hidden; opacity: 1; transform: translate(0, 0); margin-top: 14px; z-index: 2; font-family: 'Open Sans', sans-serif; font-size: 14px; } .faq_plain ul { list-style: none; perspective: 900; padding: 0; margin: 0; } .faq_plain ul li { position: relative; padding: 0; margin: 0; padding-bottom: 4px; padding-top: 18px; border-top: 1px solid #dce7eb; } .faq_plain ul li:nth-of-type(1) { animation-delay: 0.5s; } .faq_plain ul li:nth-of-type(2) { animation-delay: 0.75s; } .faq_plain ul li:nth-of-type(3) { animation-delay: 1s; } .faq_plain ul li:last-of-type { padding-bottom: 0; } .faq_plain ul li i { position: absolute; transform: translate(-6px, 0); margin-top: 16px; right: 0; } .faq_plain ul li i:before, ul li i:after { content: ''; position: absolute; background-color: #333333; width: 3px; height: 9px; } .faq_plain ul li i:before { transform: translate(-2px, 0) rotate(45deg); } .faq_plain ul li i:after { transform: translate(2px, 0) rotate(-45deg); } .faq_plain ul li input[type=checkbox] { position: absolute; cursor: pointer; width: 100%; height: 100%; z-index: 1; opacity: 0; } .faq_plain ul li input[type=checkbox]:checked ~ p { margin-top: 0; max-height: 0; opacity: 0; transform: translate(0, 50%); } .faq_plain ul li input[type=checkbox]:checked ~ i:before { transform: translate(2px, 0) rotate(45deg); } .faq_plain ul li input[type=checkbox]:checked ~ i:after { transform: translate(-2px, 0) rotate(-45deg); } @keyframes flipdown { 0% { opacity: 0; transform-origin: top center; transform: rotateX(-90deg); } 5% { opacity: 1; } 80% { transform: rotateX(8deg); } 83% { transform: rotateX(6deg); } 92% { transform: rotateX(-3deg); } 100% { transform-origin: top center; transform: rotateX(0deg); }}",
+        containerClassNames: ["faq_plain"],
+        colorTheme: ["#fff", "#000", "#333"],
+        properties: {},
+        componentProperties: {}
+    },
+    "audio_guide": {
+        _id: "",
+        shortId: "audio_guide",
+        name: "Concise Guide",
+        compatibleWith: ["self_tour"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Audio-based self-guide.",
+        visibility: "PUBLIC",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .audio_guide .container { width: 100%; background: transparent; font-family: 'Open Sans', sans-serif; } .audio_guide .container .heading { display: block; width: 100%; text-align: center; font-size: 24px; margin-top: 20px; } .audio_guide .container .image { display: block; height: 250px; background-size: cover; margin-bottom: 40px; } .audio_guide .container .audio audio { width: 100%; height: 280px; } .audio_guide .container .label { display: block; font-size: 22px; font-weight: 600; margin-bottom: 20px; text-align: center; }",
+        containerClassNames: ["audio_guide"],
+        colorTheme: ["#fff", "#000", "#aaa"],
+        properties: {},
+        componentProperties: {}
+    },
+    "audio_guide_expanded": {
+        _id: "",
+        shortId: "audio_guide_expanded",
+        name: "Expanded guide",
+        compatibleWith: ["self_tour"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Audio-based self-guide.",
+        visibility: "PUBLIC",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .audio_guide .container { width: 100%; background: transparent; font-family: 'Open Sans', sans-serif; } .audio_guide .container .heading { display: block; width: 100%; text-align: center; font-size: 24px; margin-top: 20px; } .audio_guide .container .image { display: block; height: 300px; background-size: cover; margin-bottom: 100px; } .audio_guide .container .audio audio { width: 100%; height: 370px; } .audio_guide .container .label { display: block; font-size: 22px; font-weight: 600; margin-bottom: 20px; text-align: center; color: #DB5124 }",
+        containerClassNames: ["audio_guide"],
+        colorTheme: ["#DB5124", "#fff", "#000", "#aaa"],
         properties: {},
         componentProperties: {}
     },
@@ -15162,9 +15345,9 @@ var style_cache = {
         previewImageUrls: [],
         description: "Natural look and feel.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_outback { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #9ca5b3; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #a5b076; font-size: 14px; text-decoration: none; color: #000 }",
+        style: "@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css'); @import url('https://fonts.googleapis.com/css2?family=Mukta&display=swap'); @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap'); .map_outback { width: 100% } .map_outback .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map_outback .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map_outback .map-control-entry { border-top: 1px solid #9ca5b3; padding: 10px; font-family: 'EB Garamond', serif; font-size: 16px; line-height: 20px; } .map_outback .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; font-family: 'Mukta', sans-serif; } .map_outback .map-control-entry .image img { width: 100%; margin-top: 10px; margin-bottom: 10px; } .map_outback .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 16px; } .map_outback .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 16px; } .map_outback .map-control-entry .location .icon { margin-right: 5px; } .map_outback .map-control-entry .callout { display: inline-block; padding: 9px 13px; border: 1px solid #a5b076; font-size: 0.7rem; text-decoration: none; text-transform: uppercase; color: #000; font-family: 'Mukta', sans-serif; font-weight: 200; margin-right: 10px; } .map_outback .map-control-entry .callout:hover { background-color: #a5b076; color: #ffffff; } .map_outback .marker .label { display: block; margin-bottom: 5px; font-size: 16px } .map_outback .marker .location { display: block; margin-bottom: 5px; } .map_outback .marker .location .icon { margin-right: 5px; } .map_outback .pagination { margin-top: 5px; } .map_outback .pagination a, .map_outback .pagination .currentPage { margin: 2px; padding: 3px; font-size: 16px; }",
         containerClassNames: ["map_outback"],
-        colorTheme: ["ae9e90", "a5b076", "93817c", "#ebe3cd", "#523735", "#f5f1e6", "c9b2a6"],
+        colorTheme: ["#ae9e90", "#a5b076", "#93817c", "#ebe3cd", "#523735", "#f5f1e6", "#c9b2a6"],
         properties: {},
         componentProperties: {},
         jsonContent: [
@@ -15458,11 +15641,11 @@ var style_cache = {
         ownerId: "",
         version: 1,
         previewImageUrls: [],
-        description: "Designed to blend with darker color themes.",
+        description: "Designed to blend with darker color themes. This style ignores the image fields specified in the template",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_inverted { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #746855; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #746855; font-size: 14px; text-decoration: none; color: #000 }",
+        style: "@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css'); url('https://fonts.googleapis.com/css2?family=Lato&display=swap') .map_inverted { width: 100% } .map_inverted .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map_inverted .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map_inverted .map-control-entry { border-top: 1px solid #9ca5b3; padding: 10px; font-family: 'Lato', sans-serif; font-size: 16px; line-height: 20px; } .map_inverted .map-control-entry .container { display: flex; flex-flow: column; } .map_inverted .map-control-entry .label { display: block; font-size: 18px; font-weight: 600; margin-bottom: 5px; font-family: 'Lato', sans-serif; order: 2; } .map_inverted .map-control-entry .image { order: 1; display: none; } .map_inverted .map-control-entry .description { order: 3; display: block; margin-bottom: 5px; font-size: 16px; } .map_inverted .map-control-entry .location { display: block; margin-bottom: 15px; font-size: 16px; order: 4 } .map_inverted .map-control-entry .location .icon { margin-right: 5px; } .map_inverted .map-control-entry .callouts { order: 5 } .map_inverted .map-control-entry .callout { display: inline-block; width: 40%; text-align: center; padding: 9px 13px; border: 1px solid #000; font-size: 14px; text-decoration: none; text-transform: uppercase; color: #000; font-family: 'Lato', sans-serif; font-weight: 600; margin-right: 10px; } .map_inverted .map-control-entry .callout:hover { background-color: #000000; color: #ffffff; } .map_inverted .marker .label { display: block; margin-bottom: 5px; font-size: 16px } .map_inverted .marker .location { display: block; margin-bottom: 5px; } .map_inverted .marker .location .icon { margin-right: 5px; } .map_inverted .pagination { margin-top: 5px; } .map_inverted .pagination a, .map_inverted .pagination .currentPage { margin: 2px; padding: 3px; font-size: 16px; }",
         containerClassNames: ["map_inverted"],
-        colorTheme: ["#746855", "#d59563", "#6b9a76", "#9ca5b3", "#17263c"],
+        colorTheme: ["#000000", "#cccccc", "#ffffff"],
         properties: {},
         componentProperties: {},
         jsonContent: [
@@ -15719,9 +15902,9 @@ var style_cache = {
         ownerId: "",
         version: 1,
         previewImageUrls: [],
-        description: "Map is designed to be suppressed from the placemarks.",
+        description: "Map is designed to be suppressed from the place marks.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .map_silver { width: 100% } .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map-control-entry { border-top: 1px solid #746855; padding: 10px; font-family: 'Open Sans', sans; } .map-control-entry .label { display: block; font-size: 20px; font-weight: 500; margin-bottom: 5px; } .map-control-entry .description { display: block; margin-bottom: 5px; font-size: 14px; } .map-control-entry .location { display: block; margin-bottom: 10px; font-size: 14px; } .map-control-entry .callout { display: inline-block; padding: 5px; border: 1px solid #746855; font-size: 14px; text-decoration: none; color: #000 }",
+        style: "@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css'); url('https://fonts.googleapis.com/css2?family=Lato&display=swap') .map_silver { width: 100% } .map_silver .map-control { width: 100%; height: 100%; display: inline-block; position: relative; max-width: 480px; vertical-align: top; overflow-y: scroll } .map_silver .map-container { min-height: 300px; height: 100%; display: inline-block; width: calc(100% - 480px); position: relative; overflow: hidden } .map_silver .map-control-entry { border-top: 1px solid #9ca5b3; padding: 10px; font-family: 'Lato', sans-serif; font-size: 16px; line-height: 20px; } .map_silver .map-control-entry .container { display: flex; flex-flow: column; } .map_silver .map-control-entry .label { display: block; font-size: 18px; font-weight: 600; margin-bottom: 5px; font-family: 'Lato', sans-serif; order: 2; } .map_silver .map-control-entry .image { order: 1 } .map_silver .map-control-entry .image img { width: 100%; margin-bottom: 10px; height: 250px; object-fit: cover; } .map_silver .map-control-entry .description { display: none; order: 3 } .map_silver .map-control-entry .location { display: block; margin-bottom: 15px; font-size: 16px; order: 4 } .map_silver .map-control-entry .location .icon { margin-right: 5px; } .map_silver .map-control-entry .callouts { order: 5 } .map_silver .map-control-entry .callout { display: inline-block; width: 40%; text-align: center; padding: 9px 13px; border: 1px solid #9ca5b3; font-size: 14px; text-decoration: none; text-transform: uppercase; color: #000; font-family: 'Lato', sans-serif; font-weight: 600; margin-right: 10px; } .map_silver .map-control-entry .callout:hover { background-color: #9ca5b3; color: #ffffff; } .map_silver .marker .label { display: block; margin-bottom: 5px; font-size: 16px } .map_silver .marker .location { display: block; margin-bottom: 5px; } .map_silver .marker .location .icon { margin-right: 5px; } .map_silver .pagination { margin-top: 5px; } .map_silver .pagination a, .map_silver .pagination .currentPage { margin: 2px; padding: 3px; font-size: 16px; }",
         containerClassNames: ["map_silver"],
         colorTheme: ["#746855", "#d59563", "#6b9a76", "#9ca5b3", "#17263c"],
         properties: {},
@@ -16034,8 +16217,8 @@ class Loader {
 }
 Loader.CALLBACK_NAME = '_dk_google_maps_loader_cb';
 
-var SERVING_DATA_URL = "https://airjam.co/s/data?id=";
-//const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
+//const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
+var SERVING_DATA_URL = "http://localhost:3001/s/data?id=";
 var PAGINATION_SHOW_SIZE = 7;
 var currentPage = {}; // global variable that keeps track of current page.
 function fetchAndRenderData() {
@@ -16124,6 +16307,9 @@ function renderMapToView(viewId, view, fetchedData, template, style) {
         var mapElement = window.document.createElement("div");
         mapElement.className = "map-container";
         view.appendChild(mapElement);
+        if (fetchedData.paginationStyle === PaginationStyle.Paged) {
+            renderPagination(viewId, view, fetchedData);
+        }
         var map = new google.maps.Map(mapElement, {
             zoom: 9,
             zoomControl: false,
@@ -16146,69 +16332,71 @@ function renderMapToView(viewId, view, fetchedData, template, style) {
                     return;
                 }
                 if (currentDataRow[locationField_1]) {
-                    var locationData = currentDataRow[locationField_1];
-                    if (locationData.display_as === DataSourceFieldType.Address) {
+                    var locationData_1 = currentDataRow[locationField_1];
+                    if (locationData_1.display_as === DataSourceFieldType.Address) {
                         // geocode then add to map
-                        geocoder.geocode({ address: locationData.raw_value }, function (results, status) {
-                            if (status === 'OK') {
-                                map.setCenter(results[0].geometry.location);
-                                var templateMap_1 = {};
-                                Object.keys(template.templateFields).forEach(function (field) {
-                                    if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
-                                        templateMap_1[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
-                                    }
-                                });
-                                var entryElement_1 = window.document.createElement("div");
-                                entryElement_1.className = "map-control-entry";
-                                entryElement_1.id = viewId + ".map.entry." + index;
-                                var containerPageContent_1 = template.pageContent[PageTypes.LIST];
-                                containerPageContent_1 = containerPageContent_1.replaceAll("{{index}}", index);
-                                Object.entries(templateMap_1).forEach(function (entry) {
-                                    var key = entry[0];
-                                    var value = entry[1];
-                                    containerPageContent_1 = containerPageContent_1.replaceAll("{{" + key + "}}", value);
-                                });
-                                entryElement_1.innerHTML += containerPageContent_1;
-                                containerElements[index] = entryElement_1;
-                                populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
-                                var markerPageContent_1 = template.pageContent[PageTypes.MARKER];
-                                markerPageContent_1 = markerPageContent_1.replaceAll("{{index}}", index);
-                                Object.entries(templateMap_1).forEach(function (entry) {
-                                    var key = entry[0];
-                                    var value = entry[1];
-                                    markerPageContent_1 = markerPageContent_1.replaceAll("{{" + key + "}}", value);
-                                });
-                                // set up info window
-                                var infoWindow_1 = new google.maps.InfoWindow({
-                                    content: markerPageContent_1,
-                                });
-                                infoWindows[index] = infoWindow_1;
-                                var marker_1 = new google.maps.Marker({
-                                    map: map,
-                                    position: results[0].geometry.location,
-                                    label: index.toString()
-                                });
-                                markers[index] = marker_1;
-                                entryElement_1.addEventListener("mouseover", function (e) {
-                                    map.panTo(results[0].geometry.location);
-                                    closeInfoWindows(infoWindows);
-                                    if (infoWindows[index])
-                                        infoWindows[index].open(map, marker_1);
-                                });
-                                marker_1.addListener("click", function () {
-                                    closeInfoWindows(infoWindows);
-                                    infoWindow_1.open(map, marker_1);
-                                    var topPos = entryElement_1.offsetTop;
-                                    controlElement.scrollTop = topPos;
-                                });
-                                updateMapBoundToFit(map, markers);
-                            }
-                            else {
-                                console.log("geocode was unsuccessful:" + status);
-                                console.log(currentDataRow);
-                                containerElements[index] = "failed";
-                            }
-                        });
+                        // random waiting added because google geocode rate limits
+                        setTimeout(function () {
+                            geocoder.geocode({ address: locationData_1.raw_value }, function (results, status) {
+                                if (status === 'OK') {
+                                    map.setCenter(results[0].geometry.location);
+                                    var templateMap_1 = {};
+                                    Object.keys(template.templateFields).forEach(function (field) {
+                                        if (fetchedData.templateFields[field] && currentDataRow[fetchedData.templateFields[field]]) {
+                                            templateMap_1[field] = currentDataRow[fetchedData.templateFields[field]].raw_value;
+                                        }
+                                    });
+                                    var entryElement_1 = window.document.createElement("div");
+                                    entryElement_1.className = "map-control-entry";
+                                    entryElement_1.id = viewId + ".map.entry." + index;
+                                    var containerPageContent_1 = template.pageContent[PageTypes.LIST];
+                                    containerPageContent_1 = containerPageContent_1.replaceAll("{{index}}", index);
+                                    Object.entries(templateMap_1).forEach(function (entry) {
+                                        var key = entry[0];
+                                        var value = entry[1];
+                                        containerPageContent_1 = containerPageContent_1.replaceAll("{{" + key + "}}", value);
+                                    });
+                                    entryElement_1.innerHTML += containerPageContent_1;
+                                    containerElements[index] = entryElement_1;
+                                    populateContainerElementsIfFull(fetchedData.data.length - 1, controlElement, containerElements);
+                                    var markerPageContent_1 = template.pageContent[PageTypes.MARKER];
+                                    markerPageContent_1 = markerPageContent_1.replaceAll("{{index}}", index);
+                                    Object.entries(templateMap_1).forEach(function (entry) {
+                                        var key = entry[0];
+                                        var value = entry[1];
+                                        markerPageContent_1 = markerPageContent_1.replaceAll("{{" + key + "}}", value);
+                                    });
+                                    // set up info window
+                                    var infoWindow_1 = new google.maps.InfoWindow({
+                                        content: markerPageContent_1,
+                                    });
+                                    infoWindows[index] = infoWindow_1;
+                                    var marker_1 = new google.maps.Marker({
+                                        map: map,
+                                        position: results[0].geometry.location,
+                                        label: index.toString()
+                                    });
+                                    markers[index] = marker_1;
+                                    entryElement_1.addEventListener("mouseover", function (e) {
+                                        map.panTo(results[0].geometry.location);
+                                        closeInfoWindows(infoWindows);
+                                        if (infoWindows[index])
+                                            infoWindows[index].open(map, marker_1);
+                                    });
+                                    marker_1.addListener("click", function () {
+                                        closeInfoWindows(infoWindows);
+                                        infoWindow_1.open(map, marker_1);
+                                        var topPos = entryElement_1.offsetTop;
+                                        controlElement.scrollTop = topPos;
+                                    });
+                                    updateMapBoundToFit(map, markers);
+                                }
+                                else {
+                                    console.log("geocode was unsuccessful:" + status);
+                                    containerElements[index] = "failed";
+                                }
+                            });
+                        }, Math.floor(Math.random() * 100));
                     }
                     else {
                         console.log("will not display this row: ");
@@ -16257,8 +16445,11 @@ function renderCollectionToView(viewId, view, fetchedData, template, style) {
         console.log(viewId + " will not be rendered because it does not have required template attributes.");
         return;
     }
+    // ignore the first row in data, since it is assumed to be a label row
+    console.log(fetchedData);
     var _loop_1 = function (i) {
         var currentRow = fetchedData.data[i];
+        console.log(currentRow);
         var templateMap = {};
         Object.keys(template.templateFields).forEach(function (field) {
             if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
@@ -16273,7 +16464,6 @@ function renderCollectionToView(viewId, view, fetchedData, template, style) {
         });
         view.innerHTML += pageContent;
     };
-    // ignore the first row in data, since it is assumed to be a label row
     for (var i = 1; i < fetchedData.data.length; i++) {
         _loop_1(i);
     }
@@ -16314,6 +16504,7 @@ function makePageLink(viewId, view, pageNumber, linkText) {
     if (currentPage[viewId] === pageNumber) {
         var textElement = window.document.createElement("span");
         textElement.innerText = pageNumber.toString();
+        textElement.className = "currentPage";
         if (linkText)
             textElement.innerText = linkText;
         return textElement;
