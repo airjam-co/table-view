@@ -1,6 +1,6 @@
 {
   "name": "@airjam/table-view",
-  "version": "0.0.8",
+  "version": "0.0.54",
   "license": "Apache-2.0",
   "author": "airjamadmin",
   "description": "Table view component library for AirJam",
@@ -57,7 +57,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@airjam/types": "^0.0.75",
+    "@airjam/types": "^0.0.82",
     "chart.js": "^4.2.0",
     "google-maps": "^4.3.3"
   }

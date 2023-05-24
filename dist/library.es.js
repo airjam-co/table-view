@@ -14510,6 +14510,7 @@ var ViewComponentType;
 //     Board = "view_board", not used, for now.
 var ViewType;
 (function (ViewType) {
+    ViewType["Spotlight"] = "view_spotlight";
     ViewType["List"] = "view_list";
     ViewType["Gallery"] = "view_gallery";
     ViewType["Graph"] = "view_graph";
@@ -14541,6 +14542,7 @@ var DataSourceFieldType;
     DataSourceFieldType["Email"] = "email";
     DataSourceFieldType["LatLng"] = "latlng";
     DataSourceFieldType["Address"] = "address";
+    DataSourceFieldType["Boolean"] = "boolean";
 })(DataSourceFieldType || (DataSourceFieldType = {}));
 var SortBy;
 (function (SortBy) {
@@ -14565,8 +14567,15 @@ var PageTypes;
     PageTypes["DETAIL"] = "DETAIL";
     PageTypes["EDIT"] = "EDIT";
     PageTypes["CREATE"] = "CREATE";
+    PageTypes["ITEM"] = "ITEM";
     PageTypes["MARKER"] = "MARKER";
+    PageTypes["SCRIPT"] = "SCRIPT";
 })(PageTypes || (PageTypes = {}));
+var DataSourceType;
+(function (DataSourceType) {
+    DataSourceType["SINGLE"] = "SINGLE";
+    DataSourceType["JOIN"] = "JOIN";
+})(DataSourceType || (DataSourceType = {}));
 var template_cache = {
     "card_list": {
         _id: "",
@@ -14581,6 +14590,7 @@ var template_cache = {
         description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: { "LIST": "<div class='container'><span class='title'>{{title}}</span><span class='image'><img src='{{thumbnail}}'/></span><span class='description'>{{description}}</span><span><a href='{{link}}'>{{linkText}}</a></span></div>" },
         templateFields: {
@@ -14627,6 +14637,7 @@ var template_cache = {
         pages: [PageTypes.LIST],
         pageContent: {},
         templateFields: {},
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             caption: {
                 name: "Caption",
@@ -14652,6 +14663,7 @@ var template_cache = {
         pages: [PageTypes.LIST],
         pageContent: {},
         templateFields: {},
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             useFirstColumnAsLabels: {
                 name: "Use First Column as Label",
@@ -14703,6 +14715,7 @@ var template_cache = {
         pages: [PageTypes.LIST],
         pageContent: {},
         templateFields: {},
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             useFirstColumnAsLabels: {
                 name: "Use First Column as Label",
@@ -14736,6 +14749,7 @@ var template_cache = {
         pages: [PageTypes.LIST],
         pageContent: {},
         templateFields: {},
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             useFirstColumnAsLabels: {
                 name: "Use First Column as Label",
@@ -14769,6 +14783,7 @@ var template_cache = {
         pages: [PageTypes.LIST],
         pageContent: {},
         templateFields: {},
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             useFirstColumnAsLabels: {
                 name: "Use First Column as Label",
@@ -14812,6 +14827,7 @@ var template_cache = {
         description: "This template displays data as a menu / catalog of items with prices.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: { "LIST": "<div class='container'><span class='name'>{{name}}</span><span class='description'>{{description}}</span><span class='price'>{{price}}</span></div>" },
         templateFields: {
@@ -14846,6 +14862,7 @@ var template_cache = {
         description: "This template displays data as a menu / catalog of items with prices and images.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: { "LIST": "<div class='container'><span class='image'><img src='{{image}}'/></span><span class='name'>{{name}}</span><span class='price'>{{price}}</span><span class='description'>{{description}}</span></div>" },
         templateFields: {
@@ -14872,6 +14889,360 @@ var template_cache = {
         },
         componentProperties: {}
     },
+    "web_spotlight": {
+        _id: "",
+        shortId: "web_spotlight",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Spotlight],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
+        name: "Web Spotlight",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/web_spotlight.png"],
+        description: "This template displays a url of a given row",
+        visibility: "PUBLIC",
+        pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
+        properties: {
+            autoDisplayFirstRow: {
+                name: "Auto display first row",
+                description: "Display the data from the first row without a lookup",
+                default: false,
+                type: "BOOLEAN"
+            },
+            staticContent: {
+                name: "Display static content",
+                description: "Display static content instead of loading a URL",
+                default: false,
+                type: "BOOLEAN"
+            },
+            scrollEnabled: {
+                name: "Scroll enabled",
+                description: "Determines whether scrolling is enabled in the displayed view",
+                default: true,
+                type: "BOOLEAN"
+            },
+            pullToRefreshEnabled: {
+                name: "Pull to refresh gesture enabled",
+                description: "Determines whether pull to refresh gesture is enabled in the displayed view. Refresh is not supported on static contents",
+                default: true,
+                type: "BOOLEAN"
+            },
+            iBeaconUuid: {
+                name: "iBeacon UUID",
+                description: "iBeacon's proximity UUID to distinguish beacons in your network",
+                default: "",
+                type: "TEXT"
+            },
+            lookupInterface: {
+                name: "Lookup interface",
+                description: "Lookup interface",
+                default: undefined,
+                type: "MULTI",
+                values: [
+                    { key: "NUMERIC", text: "Numeric", value: "NUMERIC" },
+                    { key: "TEXT", text: "Text", value: "TEXT" },
+                    { key: "BLE", text: "iBeacon", value: "BLE" },
+                ]
+            },
+        },
+        pageContent: {},
+        templateFields: {
+            url: {
+                name: "Url",
+                description: "URL to display",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            static: {
+                name: "Static content",
+                description: "Static HTML content to display instead",
+                compatibleTypes: [],
+            }
+        },
+        componentProperties: {}
+    },
+    "kiosk_guide_spotlight": {
+        _id: "",
+        shortId: "kiosk_guide_spotlight",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Spotlight],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
+        name: "Kiosk Guide Spotlight",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/kiosk_spotlight.png"],
+        description: "This template vends kiosk-style guide content",
+        visibility: "PUBLIC",
+        pages: [PageTypes.DETAIL],
+        dataSourceType: DataSourceType.SINGLE,
+        properties: {
+            autoDisplayFirstRow: {
+                name: "Auto display first row",
+                description: "Display the data from the first row without a lookup",
+                default: false,
+                type: "BOOLEAN"
+            },
+            hasAudio: {
+                name: "Add audio content",
+                description: "Display audio content",
+                default: false,
+                type: "BOOLEAN"
+            },
+            iBeaconUuid: {
+                name: "iBeacon UUID",
+                description: "iBeacon's proximity UUID to distinguish beacons in your network",
+                default: "",
+                type: "TEXT"
+            },
+            lookupInterface: {
+                name: "Lookup interface",
+                description: "Lookup interface",
+                default: undefined,
+                type: "MULTI",
+                values: [
+                    { key: "NUMERIC", text: "Numeric", value: "NUMERIC" },
+                    { key: "TEXT", text: "Text", value: "TEXT" },
+                    { key: "BLE", text: "iBeacon", value: "BLE" },
+                ]
+            },
+        },
+        pageContent: {
+            "DETAIL": "<div class='container'><span class='image' style='background-image: url(\"{{image}}\");'><span class='audio'><audio controls autoplay><source src='{{audio}}' /></audio></span></span><span class='label'>{{label}}</span><span class='description'>{{description}}</span></div>"
+        },
+        templateFields: {
+            label: {
+                name: "Label",
+                description: "Label of the artifact",
+                compatibleTypes: [],
+            },
+            image: {
+                name: "Image",
+                description: "Link to the the main image of the artifact",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            audio: {
+                name: "Audio",
+                description: "Link to the audio description of the artifact",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            description: {
+                name: "Description",
+                description: "Description of the point of interest",
+                compatibleTypes: [],
+            }
+        },
+        componentProperties: {}
+    },
+    "featured_signage": {
+        _id: "",
+        shortId: "featured_signage",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Gallery],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
+        name: "Signage - Featured",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/job_postings.png"],
+        description: "This template is designed for digital signage, optimized for displays with width greater than 1024 pixels wide.",
+        visibility: "PUBLIC",
+        pages: [PageTypes.LANDING],
+        dataSourceType: DataSourceType.SINGLE,
+        properties: {
+            featuredImageStyle: {
+                name: "Image Display Style",
+                description: "Select how you the featured images will be sized for each menu item",
+                default: "FIT",
+                type: "LIST",
+                values: [
+                    { key: "FIT", text: "Fit", value: "FIT" },
+                    { key: "FIT-Y", text: "Fit by height", value: "FIT-Y" },
+                    { key: "FIT-X", text: "Fit by weight", value: "FIT-X" },
+                    { key: "COVER", text: "Cover", value: "COVER" },
+                ]
+            },
+            displaySoldOut: {
+                name: "Show Sold-out Items",
+                description: "If checked, the display will show the items that are sold out",
+                default: false,
+                type: "BOOLEAN",
+            },
+            headerImage: {
+                name: "Header Image",
+                description: "(Optional) URL of the image to display as a header on the signage",
+                default: "",
+                type: "TEXT"
+            },
+            featuredCount: {
+                name: "Featured Count",
+                description: "(Optional) Limits the number of items featured. Leave blank if you do not want to limit",
+                default: 8,
+                type: "NUMBER",
+            },
+            rowCount: {
+                name: "Number of rows",
+                description: "(Optional) Number of rows of items to be displayed on screen",
+                default: 2,
+                type: "NUMBER",
+            },
+            refreshInterval: {
+                name: "Refresh Interval",
+                description: "(Optional) How often to refresh the signage, in seconds. Faster refresh rate incurs higher cost",
+                default: 30,
+                type: "NUMBER",
+            },
+        },
+        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='items'>[[DETAIL]]</div><span class='headerImagBottom' style='background-image: url(\"{{headerImage}}\");'></span></div>",
+            "DETAIL": "<div class='item' style='background-image: url(\"{{featuredImage}}\"); height: calc(80% / {{rowCount}}); width: calc((100% * {{rowCount}})/({{itemCount}}))'><span class='details'><span class='prices'><span class='soldOut{{soldOut}}'>SOLD OUT</span><span class='price1'>{{price1}}</span><span class='price1Name'>{{price1-title}}</span><span class='price2'>{{price2}}</span><span class='price2Name'>{{price2-title}}</span><span class='price3'>{{price3}}</span><span class='price3Name'>{{price3-title}}</span><span class='description'>{{description}}</span></span></span><span class='label'><span class='index'>{{index}}</span><span class='name'>{{name}}</span></span></div>" },
+        templateFields: {
+            name: {
+                name: "Name",
+                description: "Name of the menu",
+                compatibleTypes: [],
+            },
+            description: {
+                name: "Description",
+                description: "(Optional) Short description of the featured menu",
+                compatibleTypes: [],
+            },
+            subtext: {
+                name: "Sub-text",
+                description: "(Optional) Sub-text for the menu name",
+                compatibleTypes: [],
+            },
+            featuredImage: {
+                name: "Featured Image",
+                description: "(Optional) URL of the image to display to feature",
+                compatibleTypes: [DataSourceFieldType.Link],
+            },
+            price1: {
+                name: "Price 1",
+                description: "Price of the item",
+                compatibleTypes: [],
+            },
+            price2: {
+                name: "Price 2",
+                description: "(Optional) Secondary price of the item",
+                compatibleTypes: [],
+            },
+            price3: {
+                name: "Price 3",
+                description: "(Optional) Tertiary price of the item",
+                compatibleTypes: [],
+            },
+            soldOut: {
+                name: "Sold Out",
+                description: "(Optional) Field to check if an item is sold out",
+                compatibleTypes: [DataSourceFieldType.Boolean],
+            },
+        },
+        componentProperties: {}
+    },
+    "detailed_signage": {
+        _id: "",
+        shortId: "detailed_signage",
+        compatibleWith: ["table_view"],
+        compatibleDisplayType: [ViewType.Gallery],
+        compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
+        name: "Signage - Detailed",
+        ownerId: "",
+        version: 1,
+        previewImageUrls: ["/images/templates/job_postings.png"],
+        description: "This template is designed for digital signage, optimized for displays with width greater than 1024 pixels wide.",
+        visibility: "PUBLIC",
+        pages: [PageTypes.LANDING],
+        dataSourceType: DataSourceType.JOIN,
+        properties: {
+            displaySoldOut: {
+                name: "Show Sold-out Items",
+                description: "If checked, the display will show the items that are sold out",
+                default: false,
+                type: "BOOLEAN",
+            },
+            headerImage: {
+                name: "Header Image",
+                description: "(Optional) URL of the image to display as a header on the signage",
+                default: "",
+                type: "TEXT"
+            },
+            videoLink: {
+                name: "Video Link",
+                description: "(Optional) URL of a video to autoplay next to the menu",
+                default: "",
+                type: "TEXT"
+            },
+            columnCount: {
+                name: "Number of column",
+                description: "(Optional) Number of columns of items to be displayed on screen",
+                default: 3,
+                type: "NUMBER",
+            },
+            refreshInterval: {
+                name: "Refresh Interval",
+                description: "(Optional) How often to refresh the signage, in seconds. Faster refresh rate incurs higher cost",
+                default: 30,
+                type: "NUMBER",
+            }
+        },
+        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='mainContent'><div class='videoOverlay noVideo{{videoLink}}'><video autoplay muted loop src='{{videoLink}}'></video></div><div class='items noVideo{{videoLink}}'>[[DETAIL]]</div></div><span class='headerImagBottom' style='background-image: url(\"{{headerImage}}\");'></span></div><style>.items { -moz-column-count: {{columnCount}}; -webkit-column-count: {{columnCount}}; column-count: {{columnCount}}; }</style>",
+            "DETAIL": "<div class='categoryContainer' id ='category{{index}}'><div class='category'><span class='categoryHeader'><span class='categoryTitle'>{{category}}</span><span class='price1Name'></span><span class='price2Name'></span><span class='price3Name'></span></span><span class='catSubText'></span>[[ITEM]]</div></div>",
+            "ITEM": "<span class='soldOut{{soldOut}}'>SOLD OUT</span><div class='item'><span class='name'>{{name}}<span class='tags'>{{tags}}</span></span><span class='subtext'>{{subtext}}</span><span class='price1'>{{price1}}</span><span class='price1Value'>{{price1-title}}</span><span class='price2'>{{price2}}</span><span class='price2Value'>{{price2-title}}</span><span class='price3'>{{price3}}</span><span class='price3Value'>{{price3-title}}</span></div><span class='description'>{{description}}</span><span class='categorySubtext'>{{categorySubtext}}</span>",
+            "SCRIPT": "function processTags() { var tagElements = document.querySelectorAll(\".tags\"); for (var i=0; i < tagElements.length; i++) { var tags = tagElements[i].innerText.trim().split(' '); var processed = []; for (var j=0; j < tags.length; j++) { if (tags[j].trim() === '') continue; processed.push(\"<span class='tagLabel'>\" + tags[j] + \"</span>\"); } tagElements[i].innerHTML = processed.join(''); tagElements[i].className = tagElements[i].className.replaceAll(\"tags\", \"tagsProcessed\"); } } function uniqueTexts(el) { if (!el) return false; var arr = []; for (var i = 0; i < el.length; i++) if (el[i].innerHTML && el[i].innerHTML.trim()) arr.push(el[i].innerHTML.trim()); return [...new Set(arr)]; } function processColumn(cat, priceClass, titleClass, nameClass) { var prices = uniqueTexts(cat.querySelectorAll(priceClass)); var titles = uniqueTexts(cat.querySelectorAll(titleClass)); if ((prices.length > 0) && cat.querySelector(nameClass)) { cat.querySelector(nameClass).innerHTML = titles.length > 0 ? titles[0] : ''; if (prices.length == 1) { cat.querySelector(nameClass).innerHTML += '<span class=\"categoryPrice\">' + prices[0] + '</span>'; cat.querySelectorAll(priceClass).forEach(p => p.innerText = ''); }}} function populateCategories() { var categories = document.querySelectorAll('.category'); for (var i=0; i < categories.length; i++) { var cat = categories[i]; processColumn(cat, '.price1', '.price1Value', '.price1Name'); processColumn(cat, '.price2', '.price2Value', '.price2Name'); processColumn(cat, '.price3', '.price3Value', '.price3Name'); var subtext = uniqueTexts(cat.querySelectorAll('.categorySubtext')); if (subtext.length > 0 && cat.querySelector('.catSubText')) { cat.querySelector('.catSubText').innerHTML = subtext[0]; }}} processTags(); populateCategories();" },
+        templateFields: {
+            name: {
+                name: "Name",
+                description: "Name of the menu",
+                compatibleTypes: [],
+            },
+            category: {
+                name: "Category",
+                description: "(Optional) Category of the menu",
+                compatibleTypes: [],
+            },
+            description: {
+                name: "Description",
+                description: "(Optional) Short description of the menu item",
+                compatibleTypes: [],
+            },
+            categorySubtext: {
+                name: "Category Sub-text",
+                description: "(Optional) Sub-text for the category",
+                compatibleTypes: [],
+            },
+            subtext: {
+                name: "Sub-text",
+                description: "(Optional) Sub-text for the menu name",
+                compatibleTypes: [],
+            },
+            tags: {
+                name: "Tags",
+                description: "(Optional) Tags to display, separated by comma, next to the menu name",
+                compatibleTypes: [],
+            },
+            price1: {
+                name: "Price 1",
+                description: "Price of the item",
+                compatibleTypes: [],
+            },
+            price2: {
+                name: "Price 2",
+                description: "(Optional) Secondary price of the item",
+                compatibleTypes: [],
+            },
+            price3: {
+                name: "Price 3",
+                description: "(Optional) Tertiary price of the item",
+                compatibleTypes: [],
+            },
+            soldOut: {
+                name: "Sold Out",
+                description: "(Optional) Field to check if an item is sold out",
+                compatibleTypes: [DataSourceFieldType.Boolean],
+            },
+        },
+        componentProperties: {
+            groupingField: "category"
+        }
+    },
     "job_postings": {
         _id: "",
         shortId: "job_postings",
@@ -14885,6 +15256,7 @@ var template_cache = {
         description: "This template displays each row of data as a card, with a title, an image, and a link to redirect to.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: { "LIST": "<div class='container'><span class='title'><a href='{{link}}'>{{title}}</a></span><span class='description'>{{description}}</span></div>" },
         templateFields: {
@@ -14912,13 +15284,14 @@ var template_cache = {
         compatibleWith: ["table_view"],
         compatibleDisplayType: [ViewType.List],
         compatibleLanguages: [CodingLanguages.Javascript, CodingLanguages.Typescript, CodingLanguages.React],
-        name: "Frequently Asked Questions",
+        name: "FAQs",
         ownerId: "",
         version: 1,
         previewImageUrls: ["/images/templates/faq.png"],
         description: "This template displays each row of data as a questions and answers format.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: { "LIST": "<li><input type='checkbox' checked><i></i><h1 class='question'>{{question}}</h1><p>{{answer}}</p></li>" },
         templateFields: {
@@ -14948,6 +15321,7 @@ var template_cache = {
         description: "This template displays each row of data as a pinpoint on a map.",
         visibility: "PUBLIC",
         pages: [PageTypes.LIST, PageTypes.MARKER],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {},
         pageContent: {
             "LIST": "<div class='container'><span class='label'>{{index}}. {{label}}</span><span class='image'><img src='{{image}}'/></span><span class='description'>{{description}}</span><span class='location'><i class='fa-solid fa-map-pin icon'></i>{{location}}</span><span class='callouts'><a class='callout' href='{{calloutLink1}}'>{{calloutLinkText1}}</a><a class='callout' href='{{calloutLink2}}'>{{calloutLinkText2}}</a></span></div>",
@@ -15011,10 +15385,11 @@ var template_cache = {
         name: "Self-Guided tours",
         ownerId: "",
         version: 1,
-        previewImageUrls: ["/images/templates/store_locator.png"],
+        previewImageUrls: ["/images/templates/self_guide.png"],
         description: "This template vends self-guided tour content for mobile devices.",
         visibility: "PUBLIC",
         pages: [PageTypes.LANDING, PageTypes.DETAIL],
+        dataSourceType: DataSourceType.SINGLE,
         properties: {
             autoPlayAudio: {
                 name: "Autoplay audio",
@@ -15307,7 +15682,7 @@ var style_cache = {
         _id: "",
         shortId: "audio_guide",
         name: "Concise Guide",
-        compatibleWith: ["self_tour"],
+        compatibleWith: ["self_tour", "kiosk_guide_spotlight"],
         ownerId: "",
         version: 1,
         previewImageUrls: [],
@@ -15323,7 +15698,7 @@ var style_cache = {
         _id: "",
         shortId: "audio_guide_expanded",
         name: "Expanded guide",
-        compatibleWith: ["self_tour"],
+        compatibleWith: ["self_tour", "kiosk_guide_spotlight"],
         ownerId: "",
         version: 1,
         previewImageUrls: [],
@@ -15332,6 +15707,86 @@ var style_cache = {
         style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .audio_guide .container { width: 100%; background: transparent; font-family: 'Open Sans', sans-serif; } .audio_guide .container .heading { display: block; width: 100%; text-align: center; font-size: 24px; margin-top: 20px; } .audio_guide .container .image { display: block; height: 300px; background-size: cover; margin-bottom: 100px; } .audio_guide .container .audio audio { width: 100%; height: 370px; } .audio_guide .container .label { display: block; font-size: 22px; font-weight: 600; margin-bottom: 20px; text-align: center; color: #DB5124 }",
         containerClassNames: ["audio_guide"],
         colorTheme: ["#DB5124", "#fff", "#000", "#aaa"],
+        properties: {},
+        componentProperties: {}
+    },
+    "kiosk_tablet_horizontal": {
+        _id: "",
+        shortId: "kiosk_tablet_horizontal",
+        name: "Horizontal Expanded",
+        compatibleWith: ["kiosk_guide_spotlight"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Audio-based self-guide with layout optimized for horizontal views on larger screen devices.",
+        visibility: "PUBLIC",
+        style: "  @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');  body {    margin: 0;  }  .audio_guide {    margin: 0;    background-color: #f1f1f1;    height: 100%;  }  .audio_guide .container {    width: 100%;    background: transparent;    font-family: 'Open Sans', sans-serif;  }  .audio_guide .container .heading {    display: block;    width: 100%;    text-align: center;    font-size: 24px;    margin-top: 20px;  }  .audio_guide .container .image {    display: block;    float: left;    width: 50%;    height: 100%;    background-size: cover;    position: relative;    padding: 10px;  }  .audio_guide .container .audio audio {    width: 95%;    bottom: 10px;    position: absolute;  }  .audio_guide .container .label {    display: flex;    font-size: 32px;    font-weight: 600;    padding: 20px;    text-align: center;    color: #DB5124;  }  .audio_guide .container .description {    display: flex;    padding: 20px;    font-size: 18px;  }",
+        containerClassNames: ["audio_guide"],
+        colorTheme: ["#DB5124", "#fff", "#000", "#aaa"],
+        properties: {},
+        componentProperties: {}
+    },
+    "impact_signage": {
+        _id: "",
+        shortId: "impact_signage",
+        name: "Impact",
+        compatibleWith: ["featured_signage"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Signage with large fonts for impact.",
+        visibility: "PUBLIC",
+        style: ".impact_signage .headerImageTop { display: block; height: 20%; background-size: cover; } .impact_signage .items .item:nth-of-type(1n+9) {display: none;} .impact_signage .item { display: inline-grid; position: relative; background-size: cover; } .impact_signage  .label { position: absolute; bottom: 0; width: 100%; background-color: rgba(0,0,0,0.85); color: #ffffff; font-size: 25px; font-weight: bold; height: 30px; display: table; } .impact_signage .label .name { display: table-cell; vertical-align: middle; padding: 6px; padding-left: 10px; } .impact_signage .label .index { display: table-cell; vertical-align: middle; background-color: #ffcc00; text-align: center; color: #000000; padding: 6px; } .impact_signage .details { padding: 10px; text-align: left; font-size: 35px; font-weight: 600; display: table; margin-left: 15px; } .impact_signage .details span { position: relative; display: block; } .impact_signage .details .prices { display: table-cell; vertical-align: middle } .impact_signage .details .price1, .impact_signage .details .price2, .impact_signage .details .price3 { line-height: 25px; text-shadow: 1px 1px rgba(255,255,255,0.8); } .impact_signage .details .price1Name, .impact_signage .details .price2Name, .impact_signage .details .price3Name { font-size: 15px; text-transform: uppercase; margin-bottom: 10px; } .impact_signage .details .description { display: none; } .impact_signage .soldOutfalse { display: none !important } .impact_signage  .soldOuttrue { top: 50%; left: 50%; text-transform: uppercase; transform: translateY(-50%) translateX(-50%); font-weight: 800; font-size: 30px; padding: 10px; color: #ffffff; background-color: black; z-index: 10; position: absolute !important; text-align: center }",
+        containerClassNames: ["impact_signage"],
+        colorTheme: ["#ffcc00", "#fff", "#000"],
+        properties: {},
+        componentProperties: {}
+    },
+    "detailed_signage_columns": {
+        _id: "",
+        shortId: "detailed_signage_columns",
+        name: "Signage - Columns",
+        compatibleWith: ["detailed_signage"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Detailed signage with columns of menu items.",
+        visibility: "PUBLIC",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: 100px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - 100px); } .detailedSignage .videoOverlay { width: 35%; height: 100%; overflow: hidden; } .detailedSignage .videoOverlay.noVideo { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: 'Open Sans', sans-serif; width: calc(100% - 35%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: 18px; } .detailedSignage .categoryTitle { width: 80%; font-size: 26px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 3px; border-radius: 2px; line-height: 18px; font-size: 13px; font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: 3px; text-transform: uppercase; margin-left: 3px; } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; }",
+        containerClassNames: ["detailedSignage"],
+        colorTheme: ["#f3ca63", "#1a1d21", "#ffffff"],
+        properties: {},
+        componentProperties: {}
+    },
+    "detailed_signage_big_font": {
+        _id: "",
+        shortId: "detailed_signage_big_font",
+        name: "Signage - Big Font",
+        compatibleWith: ["detailed_signage"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "Detailed signage with columns of menu items, with a big high impact font.",
+        visibility: "PUBLIC",
+        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: 100px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - 100px); } .detailedSignage .videoOverlay { width: 35%; height: 100%; overflow: hidden; } .detailedSignage .videoOverlay.noVideo { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: 'Open Sans', sans-serif; width: calc(100% - 35%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: 36px; } .detailedSignage .categoryTitle { width: 80%; font-size: 52px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 6px; border-radius: 2px; line-height: 36px; font-size: 26px; font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: 6px; text-transform: uppercase; margin-left: 6px; } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; }",
+        containerClassNames: ["detailedSignage"],
+        colorTheme: ["#f3ca63", "#1a1d21", "#ffffff"],
+        properties: {},
+        componentProperties: {}
+    },
+    "no_style": {
+        _id: "",
+        shortId: "no_style",
+        name: "No style",
+        compatibleWith: ["web_spotlight"],
+        ownerId: "",
+        version: 1,
+        previewImageUrls: [],
+        description: "No style overrides.",
+        visibility: "PUBLIC",
+        style: "",
+        containerClassNames: [],
+        colorTheme: ["#fff", "#000"],
         properties: {},
         componentProperties: {}
     },
@@ -16221,6 +16676,7 @@ var SERVING_DATA_URL = "https://airjam.co/s/data?id=";
 //const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 var PAGINATION_SHOW_SIZE = 7;
 var currentPage = {}; // global variable that keeps track of current page.
+var refreshInterval = 0; // 0 disables refreshes
 function fetchAndRenderData() {
     if (window && window.document) {
         var tableViews = document.querySelectorAll('[display="airjam-tableview"]');
@@ -16236,11 +16692,19 @@ function fetchAndRenderData() {
                 result.json().then(function (fetchedData) {
                     var template = getTemplate(fetchedData);
                     var style = getStyle(fetchedData);
-                    if (style.containerClassNames && Array.isArray(style.containerClassNames))
-                        view.className += " " + style.containerClassNames.join(" ");
-                    var styleElement = document.createElement('style');
-                    styleElement.appendChild(window.document.createTextNode(style.style));
-                    window.document.head.appendChild(styleElement);
+                    if (style) {
+                        // todo -- choose a first style if style is not chosen for the user.
+                        if (style && style.containerClassNames && Array.isArray(style.containerClassNames))
+                            view.className += " " + style.containerClassNames.join(" ");
+                        var styleElement = document.createElement('style');
+                        styleElement.appendChild(window.document.createTextNode(style.style));
+                        window.document.head.appendChild(styleElement);
+                    }
+                    if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
+                        refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
+                    }
+                    if (refreshInterval > 0)
+                        infiniteRefresh(viewId, view, page);
                     var viewType = ViewType[fetchedData.type.valueOf()];
                     switch (viewType) {
                         case ViewType.Graph:
@@ -16257,6 +16721,7 @@ function fetchAndRenderData() {
                             renderMapToView(viewId, view, fetchedData, template, style);
                         // not yet implemented
                     }
+                    loadAndEvaluateScript(viewId, view, fetchedData, template);
                 });
             });
         });
@@ -16272,6 +16737,9 @@ function fetchAndRerenderData(viewId, view, page) {
                 var style = getStyle(fetchedData);
                 view.innerHTML = ""; // clear out just the content and reload
                 var viewType = ViewType[fetchedData.type.valueOf()];
+                if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
+                    refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
+                }
                 switch (viewType) {
                     case ViewType.Graph:
                         renderGraphToView(viewId, view, fetchedData, template, style);
@@ -16290,6 +16758,15 @@ function fetchAndRerenderData(viewId, view, page) {
             });
         });
     }
+}
+function infiniteRefresh(viewId, view, page) {
+    if (page === void 0) { page = 1; }
+    setTimeout(function () {
+        console.log("repeating");
+        fetchAndRerenderData(viewId, view, page);
+        if (refreshInterval > 0)
+            infiniteRefresh(viewId, view, page);
+    }, refreshInterval);
 }
 function renderMapToView(viewId, view, fetchedData, template, style) {
     if (!template.templateFields || !fetchedData.templateFields) {
@@ -16440,6 +16917,22 @@ function updateMapBoundToFit(map, markerMap) {
 function closeInfoWindows(infoWindows) {
     Object.values(infoWindows).forEach(function (infoWindow) { infoWindow.close(); });
 }
+function loadAndEvaluateScript(viewId, view, fetchedData, template, style) {
+    console.log("Checking scripts");
+    if (template.pageContent[PageTypes.SCRIPT]) {
+        var scriptContent_1 = template.pageContent[PageTypes.SCRIPT];
+        var propertiesMap_1 = {};
+        Object.keys(fetchedData.templateProperties).forEach(function (property) { propertiesMap_1[property] = fetchedData.templateProperties[property]; });
+        Object.keys(propertiesMap_1).forEach(function (key) {
+            var value = propertiesMap_1[key];
+            scriptContent_1 = scriptContent_1.replaceAll("{{" + key + "}}", value);
+        });
+        var newScript = window.document.createElement("script");
+        newScript.innerHTML = scriptContent_1;
+        view.appendChild(newScript);
+        eval(scriptContent_1);
+    }
+}
 function renderCollectionToView(viewId, view, fetchedData, template, style) {
     if (!template.templateFields || !template.pageContent || !fetchedData.templateFields) {
         console.log(viewId + " will not be rendered because it does not have required template attributes.");
@@ -16447,6 +16940,18 @@ function renderCollectionToView(viewId, view, fetchedData, template, style) {
     }
     // ignore the first row in data, since it is assumed to be a label row
     console.log(fetchedData);
+    if (template.pageContent[PageTypes.LIST]) {
+        view.innerHTML += renderList(fetchedData, template);
+        if (fetchedData.paginationStyle === PaginationStyle.Paged) {
+            renderPagination(viewId, view, fetchedData);
+        }
+    }
+    else if (template.pageContent[PageTypes.LANDING]) {
+        view.innerHTML += renderLanding(fetchedData, template);
+    }
+}
+function renderList(fetchedData, template) {
+    var returning = "";
     var _loop_1 = function (i) {
         var currentRow = fetchedData.data[i];
         console.log(currentRow);
@@ -16462,13 +16967,135 @@ function renderCollectionToView(viewId, view, fetchedData, template, style) {
             var value = entry[1];
             pageContent = pageContent.replaceAll("{{" + key + "}}", value); // todo templating engine will allow pass by map
         });
-        view.innerHTML += pageContent;
+        returning += pageContent;
     };
     for (var i = 1; i < fetchedData.data.length; i++) {
         _loop_1(i);
     }
-    if (fetchedData.paginationStyle === PaginationStyle.Paged) {
-        renderPagination(viewId, view, fetchedData);
+    return returning;
+}
+function renderLanding(fetchedData, template) {
+    var renderedItems = {};
+    var groupingField = "";
+    // make a component property map.
+    var propertiesMap = {};
+    Object.keys(fetchedData.templateProperties).forEach(function (property) { propertiesMap[property] = fetchedData.templateProperties[property]; });
+    if (template.pageContent[PageTypes.ITEM]) {
+        // use the groupingField to subgroup into categories, create an array of categories
+        if (template.componentProperties && template.componentProperties["groupingField"] && fetchedData.templateFields[template.componentProperties["groupingField"]]) {
+            groupingField = fetchedData.templateFields[template.componentProperties["groupingField"]];
+        }
+    }
+    var displaySoldOut = true;
+    if (fetchedData.templateProperties && fetchedData.templateProperties.displaySoldOut !== undefined) {
+        displaySoldOut = fetchedData.templateProperties.displaySoldOut;
+    }
+    var featuredCount = (template.properties && template.properties.featuredCount && template.properties.featuredCount.default) ? Number(template.properties.featuredCount.default) : fetchedData.data.length - 1;
+    if (fetchedData.templateProperties.featuredCount) {
+        featuredCount = Number(fetchedData.templateProperties.featuredCount);
+    }
+    featuredCount = Math.min(fetchedData.data.length - 1, featuredCount); // minimum between the available data or inferred preference.
+    var fieldNames = {};
+    Object.keys(template.templateFields).forEach(function (field) {
+        // assumes the top row is for labels
+        if (fetchedData.templateFields[field] && fetchedData.data[0] && fetchedData.data[0][fetchedData.templateFields[field]]) {
+            fieldNames[field.toLowerCase()] = fetchedData.data[0][fetchedData.templateFields[field]].raw_value;
+        }
+    });
+    var index = 1;
+    var _loop_2 = function (i) {
+        var currentRow = fetchedData.data[i];
+        var templateMap = {};
+        var category = "";
+        if (currentRow[groupingField])
+            category = currentRow[groupingField].raw_value;
+        Object.keys(template.templateFields).forEach(function (field) {
+            if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
+                templateMap[field] = currentRow[fetchedData.templateFields[field]].raw_value;
+            }
+        });
+        if (!displaySoldOut) {
+            if (fetchedData.templateFields["soldOut"] && currentRow[fetchedData.templateFields["soldOut"]]) {
+                var soldOut = currentRow[fetchedData.templateFields["soldOut"]].raw_value.toLowerCase() === "true";
+                if (soldOut)
+                    return "continue";
+            }
+        }
+        var pageContent = template.pageContent[PageTypes.LANDING];
+        if (template.pageContent[PageTypes.DETAIL])
+            pageContent = template.pageContent[PageTypes.DETAIL];
+        if (template.pageContent[PageTypes.ITEM])
+            pageContent = template.pageContent[PageTypes.ITEM];
+        Object.entries(templateMap).forEach(function (entry) {
+            var key = entry[0];
+            var value = entry[1];
+            pageContent = pageContent.replaceAll("{{" + key + "}}", value); // todo templating engine will allow pass by map
+            if (fieldNames[key.toLowerCase()]) {
+                pageContent = pageContent.replaceAll("{{" + key + "-title}}", fieldNames[key.toLowerCase()]);
+            }
+        });
+        if (propertiesMap) {
+            Object.keys(propertiesMap).forEach(function (key) {
+                var value = propertiesMap[key];
+                pageContent = pageContent.replaceAll("{{" + key + "}}", value);
+            });
+        }
+        pageContent = pageContent.replaceAll("{{index}}", index);
+        pageContent = pageContent.replaceAll("{{itemCount}}", featuredCount);
+        // console.log(pageContent);
+        if (!renderedItems[category]) {
+            renderedItems[category] = "";
+        }
+        renderedItems[category] += pageContent;
+        index++;
+    };
+    for (var i = 1; (index <= featuredCount) && (i < fetchedData.data.length); i++) {
+        _loop_2(i);
+    }
+    console.log(renderedItems);
+    if (template.pageContent[PageTypes.ITEM]) {
+        var detailPages_1 = "";
+        Object.keys(renderedItems).forEach(function (category, index) {
+            var items = renderedItems[category];
+            var pageContent = template.pageContent[PageTypes.DETAIL];
+            if (propertiesMap) {
+                Object.keys(propertiesMap).forEach(function (key) {
+                    var value = propertiesMap[key];
+                    pageContent = pageContent.replaceAll("{{" + key + "}}", value);
+                });
+            }
+            pageContent = pageContent.replaceAll("{{index}}", index);
+            pageContent = pageContent.replaceAll("{{category}}", category);
+            pageContent = pageContent.replaceAll("[[ITEM]]", items);
+            detailPages_1 += pageContent;
+        });
+        var landingContent_1 = template.pageContent[PageTypes.LANDING];
+        Object.keys(propertiesMap).forEach(function (key) {
+            var value = propertiesMap[key];
+            landingContent_1 = landingContent_1.replaceAll("{{" + key + "}}", value);
+        });
+        landingContent_1 = landingContent_1.replaceAll("[[DETAIL]]", detailPages_1);
+        return landingContent_1;
+    }
+    else if (template.pageContent[PageTypes.DETAIL]) {
+        var landingContent_2 = template.pageContent[PageTypes.LANDING];
+        var detailPages_2 = "";
+        Object.keys(renderedItems).forEach(function (itemKey) {
+            detailPages_2 += renderedItems[itemKey];
+        });
+        if (propertiesMap) {
+            Object.keys(propertiesMap).forEach(function (key) {
+                var value = propertiesMap[key];
+                landingContent_2 = landingContent_2.replaceAll("{{" + key + "}}", value);
+            });
+        }
+        landingContent_2 = landingContent_2.replaceAll("[[DETAIL]]", detailPages_2);
+        var stripRemaining = "\{\{.*?\}\}"; // strip everything not rendered.
+        var re = new RegExp(stripRemaining, "g");
+        return landingContent_2.replaceAll(re, "");
+    }
+    else {
+        return Object(renderedItems).map(function (entry) { return entry[1]; });
     }
 }
 function renderPagination(viewId, view, fetchedData) {

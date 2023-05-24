@@ -1,12 +1,13 @@
 import Chart from 'chart.js/auto';
 import { ChartType } from "chart.js";
-import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes } from "@airjam/types";
+import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes, TemplateProperty } from "@airjam/types";
 import {Loader, LoaderOptions} from "google-maps";
 
 const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
 //const SERVING_DATA_URL: string = "http://localhost:3001/s/data?id=";
 const PAGINATION_SHOW_SIZE: number = 7;
 let currentPage: {[id: string]: number} = {}; // global variable that keeps track of current page.
+let refreshInterval: number = 0; // 0 disables refreshes
 
 export default function fetchAndRenderData() {
   if (window && window.document) {
@@ -23,10 +24,18 @@ export default function fetchAndRenderData() {
         result.json().then((fetchedData: tableViewResponse) => {
           const template = getTemplate(fetchedData);
           const style = getStyle(fetchedData);
-          if (style.containerClassNames && Array.isArray(style.containerClassNames)) view.className += " " + style.containerClassNames.join(" ");
-          const styleElement = document.createElement('style');
-          styleElement.appendChild(window.document.createTextNode(style.style));
-          window.document.head.appendChild(styleElement);
+          if (style) {
+            // todo -- choose a first style if style is not chosen for the user.
+            if (style && style.containerClassNames && Array.isArray(style.containerClassNames)) view.className += " " + style.containerClassNames.join(" ");
+            const styleElement = document.createElement('style');
+            styleElement.appendChild(window.document.createTextNode(style.style));
+            window.document.head.appendChild(styleElement);
+          }
+          if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
+            refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
+          }
+          if (refreshInterval > 0) infiniteRefresh(viewId, view, page);
+          
           const viewType = ViewType[fetchedData.type.valueOf() as keyof typeof ViewType];
           switch(viewType) {
             case ViewType.Graph:
@@ -44,6 +53,7 @@ export default function fetchAndRenderData() {
             default:
               // not yet implemented
           }
+          loadAndEvaluateScript(viewId, view, fetchedData, template, style);
         });
       });
     });
@@ -59,6 +69,9 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
         const style = getStyle(fetchedData);
         view.innerHTML = ""; // clear out just the content and reload
         const viewType = ViewType[fetchedData.type.valueOf() as keyof typeof ViewType];
+        if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
+          refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
+        }
         switch(viewType) {
           case ViewType.Graph:
             renderGraphToView(viewId, view, fetchedData, template, style);
@@ -78,6 +91,14 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
       });
     });
   }
+}
+
+function infiniteRefresh(viewId: string, view: Element, page: number = 1) {
+  setTimeout(() => {
+    console.log("repeating");
+    fetchAndRerenderData(viewId, view, page);
+    if (refreshInterval > 0) infiniteRefresh(viewId, view, page);
+  }, refreshInterval);
 }
 
 function renderMapToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
@@ -238,6 +259,23 @@ function closeInfoWindows(infoWindows: {[index: number]: google.maps.InfoWindow}
   Object.values(infoWindows).forEach((infoWindow) => { infoWindow.close(); });
 }
 
+function loadAndEvaluateScript(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
+  console.log("Checking scripts");
+  if (template.pageContent[PageTypes.SCRIPT]) {
+    let scriptContent = template.pageContent[PageTypes.SCRIPT];
+    const propertiesMap: {[id: string]: TemplateProperty} = {};
+    Object.keys(fetchedData.templateProperties).forEach((property: any) => { propertiesMap[property] = fetchedData.templateProperties[property]; });
+    Object.keys(propertiesMap).forEach((key: string) => {
+      const value = propertiesMap[key];
+      scriptContent = scriptContent.replaceAll( "{{" + key + "}}", value);
+    });
+    var newScript = window.document.createElement("script");
+    newScript.innerHTML = scriptContent;
+    view.appendChild(newScript);
+    eval(scriptContent);
+  }
+}
+
 function renderCollectionToView(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
   if (!template.templateFields || !template.pageContent || !fetchedData.templateFields) {
     console.log(viewId + " will not be rendered because it does not have required template attributes.");
@@ -245,6 +283,18 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: tabl
   }
   // ignore the first row in data, since it is assumed to be a label row
   console.log(fetchedData);
+  if (template.pageContent[PageTypes.LIST]) {
+    view.innerHTML += renderList(fetchedData, template);
+    if (fetchedData.paginationStyle === PaginationStyle.Paged) {
+      renderPagination(viewId, view, fetchedData);
+    }
+  } else if (template.pageContent[PageTypes.LANDING]) {
+    view.innerHTML += renderLanding(fetchedData, template);
+  }
+}
+
+function renderList(fetchedData: tableViewResponse, template: any): string {
+  let returning = "";
   for (let i = 1; i < fetchedData.data.length; i++) {
     const currentRow = fetchedData.data[i];
     console.log(currentRow);
@@ -261,11 +311,131 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: tabl
       const value = entry[1];
       pageContent = pageContent.replaceAll( "{{" + key + "}}", value); // todo templating engine will allow pass by map
     });
-    view.innerHTML += pageContent;
+    returning += pageContent;
+  }
+  return returning;
+}
+
+function renderLanding(fetchedData: tableViewResponse, template: any): string {
+  const renderedItems: {[category: string]: string} = {};
+  let groupingField = "";
+  // make a component property map.
+  const propertiesMap: {[id: string]: TemplateProperty} = {};
+  Object.keys(fetchedData.templateProperties).forEach((property: any) => { propertiesMap[property] = fetchedData.templateProperties[property]; });
+
+  if (template.pageContent[PageTypes.ITEM]) {
+    // use the groupingField to subgroup into categories, create an array of categories
+    if (template.componentProperties && template.componentProperties["groupingField"] && fetchedData.templateFields[template.componentProperties["groupingField"]]) {
+      groupingField = fetchedData.templateFields[template.componentProperties["groupingField"]];
     }
-    if (fetchedData.paginationStyle === PaginationStyle.Paged) {
-      renderPagination(viewId, view, fetchedData);
+  }
+  let displaySoldOut: boolean = true;
+  if (fetchedData.templateProperties && fetchedData.templateProperties.displaySoldOut !== undefined) {
+    displaySoldOut = fetchedData.templateProperties.displaySoldOut;
+  }
+
+  let featuredCount = (template.properties && template.properties.featuredCount && template.properties.featuredCount.default) ? Number(template.properties.featuredCount.default) : fetchedData.data.length - 1;
+  if (fetchedData.templateProperties.featuredCount) {
+    featuredCount = Number(fetchedData.templateProperties.featuredCount);
+  }
+  featuredCount = Math.min(fetchedData.data.length - 1, featuredCount); // minimum between the available data or inferred preference.
+
+  let fieldNames: {[field: string]: string} = {};
+  Object.keys(template.templateFields).forEach((field: string) => {
+    // assumes the top row is for labels
+    if (fetchedData.templateFields[field] && fetchedData.data[0] && fetchedData.data[0][fetchedData.templateFields[field]]) {
+      fieldNames[field.toLowerCase()] = fetchedData.data[0][fetchedData.templateFields[field]].raw_value;
     }
+  });
+
+  let index = 1;
+  for (let i = 1; (index <= featuredCount) && (i < fetchedData.data.length); i++) {
+    const currentRow = fetchedData.data[i];
+    const templateMap: {[id: string]: string} = {};
+    let category = "";
+    if (currentRow[groupingField]) category = currentRow[groupingField].raw_value;
+    Object.keys(template.templateFields).forEach((field: string) => {
+      if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
+        templateMap[field] = currentRow[fetchedData.templateFields[field]].raw_value;
+      }
+    });
+    if (!displaySoldOut) {
+      if (fetchedData.templateFields["soldOut"] && currentRow[fetchedData.templateFields["soldOut"]]) {
+        const soldOut = currentRow[fetchedData.templateFields["soldOut"]].raw_value.toLowerCase() === "true";
+        if (soldOut) continue;
+      }
+    }
+
+    let pageContent = template.pageContent[PageTypes.LANDING];
+    if (template.pageContent[PageTypes.DETAIL]) pageContent = template.pageContent[PageTypes.DETAIL];
+    if (template.pageContent[PageTypes.ITEM]) pageContent = template.pageContent[PageTypes.ITEM];
+    Object.entries(templateMap).forEach((entry: any[]) => {
+      const key = entry[0];
+      const value = entry[1];
+      pageContent = pageContent.replaceAll( "{{" + key + "}}", value); // todo templating engine will allow pass by map
+      if (fieldNames[key.toLowerCase()]) {
+        pageContent = pageContent.replaceAll( "{{" + key + "-title}}", fieldNames[key.toLowerCase()]);
+      }
+    });
+    if (propertiesMap) {
+      Object.keys(propertiesMap).forEach((key: string) => {
+        const value = propertiesMap[key];
+        pageContent = pageContent.replaceAll( "{{" + key + "}}", value);
+      });
+    }
+    pageContent = pageContent.replaceAll( "{{index}}", index);
+    pageContent = pageContent.replaceAll( "{{itemCount}}", featuredCount);
+    // console.log(pageContent);
+    if (!renderedItems[category]) {
+      renderedItems[category] = "";
+    }
+    renderedItems[category] += pageContent;
+    index++;
+  }
+  console.log(renderedItems);
+  if (template.pageContent[PageTypes.ITEM]) {
+    let detailPages: string = "";
+    Object.keys(renderedItems).forEach((category: string, index: number) => {
+      const items = renderedItems[category];
+      let pageContent = template.pageContent[PageTypes.DETAIL];
+      if (propertiesMap) {
+        Object.keys(propertiesMap).forEach((key: string) => {
+          const value = propertiesMap[key];
+          pageContent = pageContent.replaceAll( "{{" + key + "}}", value);
+        });
+      }
+      pageContent = pageContent.replaceAll( "{{index}}", index);
+      pageContent = pageContent.replaceAll( "{{category}}" , category);
+      pageContent = pageContent.replaceAll( "[[ITEM]]" , items);
+      detailPages += pageContent;
+    });
+
+    let landingContent = template.pageContent[PageTypes.LANDING];
+    Object.keys(propertiesMap).forEach((key: string) => {
+      const value = propertiesMap[key];
+      landingContent = landingContent.replaceAll( "{{" + key + "}}", value);
+    });
+    landingContent = landingContent.replaceAll( "[[DETAIL]]" , detailPages);
+    return landingContent;
+  } else if (template.pageContent[PageTypes.DETAIL]) {
+    let landingContent = template.pageContent[PageTypes.LANDING];
+    let detailPages: string = "";
+    Object.keys(renderedItems).forEach((itemKey: string) => {
+      detailPages += renderedItems[itemKey];
+    });
+    if (propertiesMap) {
+      Object.keys(propertiesMap).forEach((key: string) => {
+        const value = propertiesMap[key];
+        landingContent = landingContent.replaceAll( "{{" + key + "}}", value);
+      });
+    }
+    landingContent = landingContent.replaceAll( "[[DETAIL]]" , detailPages);
+    const stripRemaining = "\{\{.*?\}\}"; // strip everything not rendered.
+    const re = new RegExp(stripRemaining, "g");
+    return landingContent.replaceAll(re, "");
+  } else {
+    return Object(renderedItems).map((entry: any[]) => entry[1]);;
+  }
 }
 
 function renderPagination(viewId: string, view: Element, fetchedData: tableViewResponse) {
