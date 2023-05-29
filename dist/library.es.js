@@ -15091,7 +15091,7 @@ var template_cache = {
                 type: "NUMBER",
             },
         },
-        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='items'>[[DETAIL]]</div><span class='headerImagBottom' style='background-image: url(\"{{headerImage}}\");'></span></div>",
+        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='items'>[[DETAIL]]</div><span class='headerImageBottom' style='background-image: url(\"{{headerImage}}\");'></span></div>",
             "DETAIL": "<div class='item' style='background-image: url(\"{{featuredImage}}\"); height: calc(80% / {{rowCount}}); width: calc((100% * {{rowCount}})/({{itemCount}}))'><span class='details'><span class='prices'><span class='soldOut{{soldOut}}'>SOLD OUT</span><span class='price1'>{{price1}}</span><span class='price1Name'>{{price1-title}}</span><span class='price2'>{{price2}}</span><span class='price2Name'>{{price2-title}}</span><span class='price3'>{{price3}}</span><span class='price3Name'>{{price3-title}}</span><span class='description'>{{description}}</span></span></span><span class='label'><span class='index'>{{index}}</span><span class='name'>{{name}}</span></span></div>" },
         templateFields: {
             name: {
@@ -15164,17 +15164,41 @@ var template_cache = {
                 default: "",
                 type: "TEXT"
             },
-            videoLink: {
-                name: "Video Link",
-                description: "(Optional) URL of a video to autoplay next to the menu",
-                default: "",
-                type: "TEXT"
-            },
             columnCount: {
                 name: "Number of column",
                 description: "(Optional) Number of columns of items to be displayed on screen",
                 default: 3,
                 type: "NUMBER",
+            },
+            displayMediaType: {
+                name: "Adjacent media",
+                description: "Select the type of media shown next to the menu items",
+                default: "NONE",
+                type: "LIST",
+                values: [
+                    { key: "NONE", text: "No media to display", value: "NONE" },
+                    { key: "VIDEO", text: "Video", value: "VIDEO" },
+                    { key: "IMAGE", text: "An image", value: "IMAGE" },
+                    { key: "IMAGES", text: "Gallery of images", value: "IMAGES" },
+                ]
+            },
+            mediaLink: {
+                name: "Media Link",
+                description: "(Optional) URL(s) of media to play adjacent to the menu",
+                default: "",
+                type: "TEXT"
+            },
+            tickerType: {
+                name: "Bottom Ticker",
+                description: "(Optional) Type of the ticker shown on the bottom of the screen",
+                default: "NONE",
+                type: "LIST",
+                values: [
+                    { key: "NONE", text: "Do not display", value: "NONE" },
+                    { key: "NEWS", text: "Latest news and quotes", value: "NEWS" },
+                    { key: "WEATHER", text: "Local weather information", value: "WEATHER" },
+                    { key: "CUSTOM", text: "Custom message", value: "CUSTOM" },
+                ]
             },
             refreshInterval: {
                 name: "Refresh Interval",
@@ -15183,10 +15207,10 @@ var template_cache = {
                 type: "NUMBER",
             }
         },
-        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='mainContent'><div class='videoOverlay noVideo{{videoLink}}'><video autoplay muted loop src='{{videoLink}}'></video></div><div class='items noVideo{{videoLink}}'>[[DETAIL]]</div></div><span class='headerImagBottom' style='background-image: url(\"{{headerImage}}\");'></span></div><style>.items { -moz-column-count: {{columnCount}}; -webkit-column-count: {{columnCount}}; column-count: {{columnCount}}; }</style>",
+        pageContent: { "LANDING": "<div class='container'><span class='headerImageTop' style='background-image: url(\"{{headerImage}}\");'></span><div class='mainContent tickerType{{tickerType}}'><div class='imageOverlay noImage{{mediaLink}} image{{displayMediaType}}'><img src='{{mediaLink}}'/></div> <div class='videoOverlay noVideo{{mediaLink}} video{{displayMediaType}}'><video autoplay muted loop src='{{mediaLink}}'></video></div><div class='items noVideo{{mediaLink}}'>[[DETAIL]]</div></div><span class='headerImageBottom' style='background-image: url(\"{{headerImage}}\");'></span><div class='tickerContainer tickerTypeHas{{tickerType}}'><span id='tickerClock' class='tickerClock'></span><span class='tickerTypeWEATHER tickerTypeHas{{tickerType}}'><div id='ww_09c207bc8e494' v='1.3' loc='auto' a='{\"t\":\"ticker\",\"lang\":\"en\",\"sl_lpl\":1,\"ids\":[],\"font\":\"Arial\",\"sl_ics\":\"one_a\",\"sl_sot\":\"fahrenheit\",\"cl_bkg\":\"image\",\"cl_font\":\"#FFFFFF\",\"cl_cloud\":\"#FFFFFF\",\"cl_persp\":\"#81D4FA\",\"cl_sun\":\"#FFC107\",\"cl_moon\":\"#FFC107\",\"cl_thund\":\"#FF5722\"}'><a href='https://weatherwidget.org/uk/' id='ww_09c207bc8e494_u' target='_blank'>&#1041;&#1077;&#1079;&#1082;&#1086;&#1096;&#1090;&#1086;&#1074;&#1085;&#1080;&#1081; HTML &#1087;&#1086;&#1075;&#1086;&#1076;&#1085;&#1080;&#1081; &#1110;&#1085;&#1092;&#1086;&#1088;&#1084;&#1077;&#1088; &#1076;&#1083;&#1103; &#1089;&#1072;&#1081;&#1090;&#1091;</a></div></span></div></div><style>.items { -moz-column-count: {{columnCount}}; -webkit-column-count: {{columnCount}}; column-count: {{columnCount}}; }</style>",
             "DETAIL": "<div class='categoryContainer' id ='category{{index}}'><div class='category'><span class='categoryHeader'><span class='categoryTitle'>{{category}}</span><span class='price1Name'></span><span class='price2Name'></span><span class='price3Name'></span></span><span class='catSubText'></span>[[ITEM]]</div></div>",
             "ITEM": "<span class='soldOut{{soldOut}}'>SOLD OUT</span><div class='item'><span class='name'>{{name}}<span class='tags'>{{tags}}</span></span><span class='subtext'>{{subtext}}</span><span class='price1'>{{price1}}</span><span class='price1Value'>{{price1-title}}</span><span class='price2'>{{price2}}</span><span class='price2Value'>{{price2-title}}</span><span class='price3'>{{price3}}</span><span class='price3Value'>{{price3-title}}</span></div><span class='description'>{{description}}</span><span class='categorySubtext'>{{categorySubtext}}</span>",
-            "SCRIPT": "function processTags() { var tagElements = document.querySelectorAll(\".tags\"); for (var i=0; i < tagElements.length; i++) { var tags = tagElements[i].innerText.trim().split(' '); var processed = []; for (var j=0; j < tags.length; j++) { if (tags[j].trim() === '') continue; processed.push(\"<span class='tagLabel'>\" + tags[j] + \"</span>\"); } tagElements[i].innerHTML = processed.join(''); tagElements[i].className = tagElements[i].className.replaceAll(\"tags\", \"tagsProcessed\"); } } function uniqueTexts(el) { if (!el) return false; var arr = []; for (var i = 0; i < el.length; i++) if (el[i].innerHTML && el[i].innerHTML.trim()) arr.push(el[i].innerHTML.trim()); return [...new Set(arr)]; } function processColumn(cat, priceClass, titleClass, nameClass) { var prices = uniqueTexts(cat.querySelectorAll(priceClass)); var titles = uniqueTexts(cat.querySelectorAll(titleClass)); if ((prices.length > 0) && cat.querySelector(nameClass)) { cat.querySelector(nameClass).innerHTML = titles.length > 0 ? titles[0] : ''; if (prices.length == 1) { cat.querySelector(nameClass).innerHTML += '<span class=\"categoryPrice\">' + prices[0] + '</span>'; cat.querySelectorAll(priceClass).forEach(p => p.innerText = ''); }}} function populateCategories() { var categories = document.querySelectorAll('.category'); for (var i=0; i < categories.length; i++) { var cat = categories[i]; processColumn(cat, '.price1', '.price1Value', '.price1Name'); processColumn(cat, '.price2', '.price2Value', '.price2Name'); processColumn(cat, '.price3', '.price3Value', '.price3Name'); var subtext = uniqueTexts(cat.querySelectorAll('.categorySubtext')); if (subtext.length > 0 && cat.querySelector('.catSubText')) { cat.querySelector('.catSubText').innerHTML = subtext[0]; }}} processTags(); populateCategories();" },
+            "SCRIPT": "<script>function processTags() { var tagElements = document.querySelectorAll(\".tags\"); for (var i=0; i < tagElements.length; i++) { var tags = tagElements[i].innerText.trim().split(' '); var processed = []; for (var j=0; j < tags.length; j++) { if (tags[j].trim() === '') continue; processed.push(\"<span class='tagLabel'>\" + tags[j] + \"</span>\"); } tagElements[i].innerHTML = processed.join(''); tagElements[i].className = tagElements[i].className.replaceAll(\"tags\", \"tagsProcessed\"); } } function uniqueTexts(el) { if (!el) return false; var arr = []; for (var i = 0; i < el.length; i++) if (el[i].innerHTML && el[i].innerHTML.trim()) arr.push(el[i].innerHTML.trim()); return [...new Set(arr)]; } function processColumn(cat, priceClass, titleClass, nameClass) { var prices = uniqueTexts(cat.querySelectorAll(priceClass)); var titles = uniqueTexts(cat.querySelectorAll(titleClass)); if ((prices.length > 0) && cat.querySelector(nameClass)) { cat.querySelector(nameClass).innerHTML = titles.length > 0 ? titles[0] : ''; if (prices.length == 1) { cat.querySelector(nameClass).innerHTML += '<span class=\"categoryPrice\">' + prices[0] + '</span>'; cat.querySelectorAll(priceClass).forEach(p => p.innerText = ''); }}} function populateCategories() { var categories = document.querySelectorAll('.category'); for (var i=0; i < categories.length; i++) { var cat = categories[i]; processColumn(cat, '.price1', '.price1Value', '.price1Name'); processColumn(cat, '.price2', '.price2Value', '.price2Name'); processColumn(cat, '.price3', '.price3Value', '.price3Name'); var subtext = uniqueTexts(cat.querySelectorAll('.categorySubtext')); if (subtext.length > 0 && cat.querySelector('.catSubText')) { cat.querySelector('.catSubText').innerHTML = subtext[0]; }}} function tickerTime() { let date = new Date(); let hh = date.getHours(); let mm = date.getMinutes(); let session = 'AM'; if(hh >= 12) { session = 'PM'; } if(hh > 12) { hh -= 12; } mm = (mm < 10) ? '0' + mm : mm; let time = hh + ':' + mm + session; document.getElementById('tickerClock').innerText = time; var t = setTimeout(function(){ tickerTime() }, 1000);} tickerTime(); processTags(); populateCategories();</script><script async src=\"https://app1.weatherwidget.org/js/?id=ww_09c207bc8e494\"></script>" },
         templateFields: {
             name: {
                 name: "Name",
@@ -15736,10 +15760,17 @@ var style_cache = {
         previewImageUrls: [],
         description: "Signage with large fonts for impact.",
         visibility: "PUBLIC",
-        style: ".impact_signage .headerImageTop { display: block; height: 20%; background-size: cover; } .impact_signage .items .item:nth-of-type(1n+9) {display: none;} .impact_signage .item { display: inline-grid; position: relative; background-size: cover; } .impact_signage  .label { position: absolute; bottom: 0; width: 100%; background-color: rgba(0,0,0,0.85); color: #ffffff; font-size: 25px; font-weight: bold; height: 30px; display: table; } .impact_signage .label .name { display: table-cell; vertical-align: middle; padding: 6px; padding-left: 10px; } .impact_signage .label .index { display: table-cell; vertical-align: middle; background-color: #ffcc00; text-align: center; color: #000000; padding: 6px; } .impact_signage .details { padding: 10px; text-align: left; font-size: 35px; font-weight: 600; display: table; margin-left: 15px; } .impact_signage .details span { position: relative; display: block; } .impact_signage .details .prices { display: table-cell; vertical-align: middle } .impact_signage .details .price1, .impact_signage .details .price2, .impact_signage .details .price3 { line-height: 25px; text-shadow: 1px 1px rgba(255,255,255,0.8); } .impact_signage .details .price1Name, .impact_signage .details .price2Name, .impact_signage .details .price3Name { font-size: 15px; text-transform: uppercase; margin-bottom: 10px; } .impact_signage .details .description { display: none; } .impact_signage .soldOutfalse { display: none !important } .impact_signage  .soldOuttrue { top: 50%; left: 50%; text-transform: uppercase; transform: translateY(-50%) translateX(-50%); font-weight: 800; font-size: 30px; padding: 10px; color: #ffffff; background-color: black; z-index: 10; position: absolute !important; text-align: center }",
+        style: ".impact_signage .headerImageTop { display: block; height: {{headerImageHeight}}px; background-size: cover; } .impact_signage .items .item:nth-of-type(1n+9) {display: none;} .impact_signage .item { display: inline-grid; position: relative; background-size: cover; } .impact_signage .label { position: absolute; bottom: 0; width: 100%; background-color: rgba(0,0,0,0.85); color: #ffffff; font-size: 25px; font-weight: bold; height: 30px; display: table; } .impact_signage .label .name { display: table-cell; vertical-align: middle; padding: 6px; padding-left: 10px; } .impact_signage .label .index { display: table-cell; vertical-align: middle; background-color: #ffcc00; text-align: center; color: #000000; padding: 6px; } .impact_signage .details { padding: 10px; text-align: left; font-size: 35px; font-weight: 600; display: table; margin-left: 15px; } .impact_signage .details span { position: relative; display: block; } .impact_signage .details .prices { display: table-cell; vertical-align: middle } .impact_signage .details .price1, .impact_signage .details .price2, .impact_signage .details .price3 { line-height: 25px; text-shadow: 1px 1px rgba(255,255,255,0.8); } .impact_signage .details .price1Name, .impact_signage .details .price2Name, .impact_signage .details .price3Name { font-size: 15px; text-transform: uppercase; margin-bottom: 10px; } .impact_signage .details .description { display: none; } .impact_signage .soldOutfalse { display: none !important } .impact_signage  .soldOuttrue { top: 50%; left: 50%; text-transform: uppercase; transform: translateY(-50%) translateX(-50%); font-weight: 800; font-size: 30px; padding: 10px; color: #ffffff; background-color: black; z-index: 10; position: absolute !important; text-align: center }",
         containerClassNames: ["impact_signage"],
         colorTheme: ["#ffcc00", "#fff", "#000"],
-        properties: {},
+        properties: {
+            headerImageHeight: {
+                name: "Header Image Height",
+                description: "(Optional) Height of the image on top (or bottom) to be displayed.",
+                default: 100,
+                type: "NUMBER",
+            },
+        },
         componentProperties: {}
     },
     "detailed_signage_columns": {
@@ -15752,10 +15783,41 @@ var style_cache = {
         previewImageUrls: [],
         description: "Detailed signage with columns of menu items.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: 100px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - 100px); } .detailedSignage .videoOverlay { width: 35%; height: 100%; overflow: hidden; } .detailedSignage .videoOverlay.noVideo { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: 'Open Sans', sans-serif; width: calc(100% - 35%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: 18px; } .detailedSignage .categoryTitle { width: 80%; font-size: 26px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 3px; border-radius: 2px; line-height: 18px; font-size: 13px; font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: 3px; text-transform: uppercase; margin-left: 3px; } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; }",
+        style: "{{customCss}} @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: {{headerImageHeight}}px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - {{headerImageHeight}}px - 40px); } .detailedSignage .mainContent.tickerTypeNONE { height: calc(100% - {{headerImageHeight}}px); } .detailedSignage .mainContent span.tickerTypeNONE { display: none; } .detailedSignage .videoOverlay, .detailedSignage .imageOverlay { width: {{mediaWidth}}%; height: 100%; overflow: hidden; } .detailedSignage .imageOverlay img { width: 100%; height: 100%; object-fit: cover; } .detailedSignage .imageOverlay.noImage,  .detailedSignage .imageOverlay.imageNONE, .detailedSignage .imageOverlay.imageVIDEO, .detailedSignage .imageOverlay.imageIMAGES { display: none; } .detailedSignage .videoOverlay.noVideo, .detailedSignage .videoOverlay.videoNONE, .detailedSignage .videoOverlay.videoIMAGE, .detailedSignage .videoOverlay.videoIMAGES { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: {{fontFamily}}; width: calc(100% - {{mediaWidth}}%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: calc({{fontSize}}px * 0.7); } .detailedSignage .categoryTitle { width: 80%; font-size: {{fontSize}}px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 3px; border-radius: 2px; line-height: 18px; font-size: calc({{fontSize}}px / 2); font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: 3px; text-transform: uppercase; margin-left: 3px; } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; } .detailedSignage span.tickerTypeNONE, .detailedSignage span.tickerTypeNEWS, .detailedSignage span.tickerTypeWEATHER, .detailedSignage span.tickerTypeCUSTOM { display: none; } .tickerContainer.tickerTypeHasNONE { display: none; } .detailedSignage .tickerClock { width: 150px; font-size: 28px; height: 40px; font-weight: bold; display: inline-block; font-family: 'Open Sans', sans-serif; text-align: center; color: #fff; background-color: #000; vertical-align: top; } .detailedSignage span.tickerTypeWEATHER.tickerTypeHasWEATHER, .detailedSignage .tickerTypeNEWS.tickerTypeHasNEWS, .detailedSignage .tickerTypeCUSTOM.tickerTypeHasCUSTOM { display: inline-block; width: calc(100% - 150px); } .tickerTypeWEATHER a, .tickerTypeWEATHER a:link,  .tickerTypeWEATHER a:visited,  .tickerTypeWEATHER a:hover, .tickerTypeWEATHER a:active  { color: #fff; }",
         containerClassNames: ["detailedSignage"],
         colorTheme: ["#f3ca63", "#1a1d21", "#ffffff"],
-        properties: {},
+        properties: {
+            headerImageHeight: {
+                name: "Header Image Height",
+                description: "(Optional) Height of the image on top (or bottom) to be displayed.",
+                default: 100,
+                type: "NUMBER",
+            },
+            mediaWidth: {
+                name: "Media Width",
+                description: "(Optional) Width, in percentage over the entire screen, to assign to the media to be displayed.",
+                default: 35,
+                type: "NUMBER",
+            },
+            fontSize: {
+                name: "Font Sizes",
+                description: "(Optional) Relative text sizes",
+                default: 26,
+                type: "NUMBER",
+            },
+            fontFamily: {
+                name: "Font Family",
+                description: "(Optional) Family of fonts to use",
+                default: "'Open Sans', sans-serif",
+                type: "TEXT"
+            },
+            customCss: {
+                name: "Custom CSS",
+                description: "(Optional) Custom CSS overrides",
+                default: "",
+                type: "TEXT"
+            }
+        },
         componentProperties: {}
     },
     "detailed_signage_big_font": {
@@ -15768,10 +15830,41 @@ var style_cache = {
         previewImageUrls: [],
         description: "Detailed signage with columns of menu items, with a big high impact font.",
         visibility: "PUBLIC",
-        style: "@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: 100px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - 100px); } .detailedSignage .videoOverlay { width: 35%; height: 100%; overflow: hidden; } .detailedSignage .videoOverlay.noVideo { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: 'Open Sans', sans-serif; width: calc(100% - 35%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: 36px; } .detailedSignage .categoryTitle { width: 80%; font-size: 52px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 6px; border-radius: 2px; line-height: 36px; font-size: 26px; font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: 6px; text-transform: uppercase; margin-left: 6px; } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; }",
+        style: "{{customCss}} @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); .detailedSignage .headerImageTop { height: {{headerImageHeight}}px; display: block; background-size: cover; } .detailedSignage .mainContent { display: flex; height: calc(100% - {{headerImageHeight}}px - 40px); } .detailedSignage .mainContent.tickerTypeNONE { height: calc(100% - {{headerImageHeight}}px); } .detailedSignage .mainContent span.tickerTypeNONE { display: none; } .detailedSignage .videoOverlay,  .detailedSignage .imageOverlay { width: {{mediaWidth}}%; height: 100%; overflow: hidden; } .detailedSignage .imageOverlay img { width: 100%; height: 100%; object-fit: cover; } .detailedSignage .imageOverlay.noImage, .detailedSignage .imageOverlay.imageNONE, .detailedSignage .imageOverlay.imageVIDEO, .detailedSignage .imageOverlay.imageIMAGES { display: none; } .detailedSignage .videoOverlay.noVideo, .detailedSignage .videoOverlay.videoNONE, .detailedSignage .videoOverlay.videoIMAGE, .detailedSignage .videoOverlay.videoIMAGES { display: none; } .detailedSignage .videoOverlay video { height: 100%; width: 100%; object-fit: cover; } .detailedSignage .items { font-family: {{fontFamily}}; width: calc(100% - {{mediaWidth}}%); height: 100%; overflow: hidden; -moz-column-gap: 10px; -webkit-column-gap: 10px; column-gap: 10px; } .detailedSignage .items.noVideo { width: 100%; } .detailedSignage .categoryContainer { display: inline-block; width: 100%; } .detailedSignage .category { display: inline-table; padding: 10px; float: left; width: 100%; position: relative; font-size: calc({{fontSize}}px * 0.6); } .detailedSignage .categoryTitle { width: 80%; font-size: {{fontSize}}px; font-weight: bold; display: table-cell; } .detailedSignage .catSubText { display: block; margin-bottom: 10px; } .detailedSignage .categoryHeader { display: table-row; } .detailedSignage .categorySubtext { display: table-row; } .detailedSignage .price1Name, .detailedSignage .price2Name, .detailedSignage .price3Name { display: table-cell; } .detailedSignage .item { display: table-row; margin-bottom: 5px; } .detailedSignage .item .name { display: table-cell; } .detailedSignage .item .subtext { display: none; } .detailedSignage .item .price1, .detailedSignage .item .price2, .detailedSignage .item .price3 { display: table-cell; } .detailedSignage .item .description { display: table-row; font-style: italic; } .detailedSignage .soldOutTRUE { background-color: rgba(255,0,0,0.8); position: absolute; color: white; padding: 1px; width: 94%; text-align: center; font-weight: bold; } .detailedSignage .soldOutFALSE { display: none; } .detailedSignage .tagLabel { display: inline-block; background: #f3ca63; color: #1a1d21; padding: 0 6px; border-radius: 2px; line-height: calc({{fontSize}}px * 0.7); font-size: calc({{fontSize}}px / 2); font-weight: bold; overflow: hidden; position: relative; bottom: -2px; left: calc({{fontSize}}px / 8); text-transform: uppercase; margin-left: calc({{fontSize}}px / 8); } .detailedSignage .categorySubtext { display: none; } .detailedSignage .price1Value, .detailedSignage .price2Value, .detailedSignage .price3Value { display: none; } .detailedSignage .categoryPrice { display: block; } .detailedSignage .category .description { font-style: italic; } .detailedSignage span.tickerTypeNONE, .detailedSignage span.tickerTypeNEWS, .detailedSignage span.tickerTypeWEATHER, .detailedSignage span.tickerTypeCUSTOM { display: none; } .detailedSignage .tickerContainer.tickerTypeHasNONE { display: none; } .detailedSignage .tickerClock { width: 150px; font-size: 28px; height: 40px; font-weight: bold; display: inline-block; font-family: 'Open Sans', sans-serif; text-align: center; color: #fff; background-color: #000; vertical-align: top; }  .detailedSignage span.tickerTypeWEATHER.tickerTypeHasWEATHER, .detailedSignage .tickerTypeNEWS.tickerTypeHasNEWS, .detailedSignage .tickerTypeCUSTOM.tickerTypeHasCUSTOM { display: inline-block; width: calc(100% - 150px); } .tickerTypeWEATHER a, .tickerTypeWEATHER a:link,  .tickerTypeWEATHER a:visited,  .tickerTypeWEATHER a:hover, .tickerTypeWEATHER a:active  { color: #fff; }",
         containerClassNames: ["detailedSignage"],
         colorTheme: ["#f3ca63", "#1a1d21", "#ffffff"],
-        properties: {},
+        properties: {
+            headerImageHeight: {
+                name: "Header Image Height",
+                description: "(Optional) Height of the image on top (or bottom) to be displayed.",
+                default: 100,
+                type: "NUMBER",
+            },
+            mediaWidth: {
+                name: "Media Width",
+                description: "(Optional) Width, in percentage over the entire screen, to assign to the media to be displayed.",
+                default: 35,
+                type: "NUMBER",
+            },
+            fontSize: {
+                name: "Font Sizes",
+                description: "(Optional) Relative text sizes",
+                default: 46,
+                type: "NUMBER",
+            },
+            fontFamily: {
+                name: "Font Family",
+                description: "(Optional) Family of fonts to use",
+                default: "'Open Sans', sans-serif",
+                type: "TEXT"
+            },
+            customCss: {
+                name: "Custom CSS",
+                description: "(Optional) Custom CSS overrides",
+                default: "",
+                type: "TEXT"
+            }
+        },
         componentProperties: {}
     },
     "no_style": {
@@ -16692,14 +16785,8 @@ function fetchAndRenderData() {
                 result.json().then(function (fetchedData) {
                     var template = getTemplate(fetchedData);
                     var style = getStyle(fetchedData);
-                    if (style) {
-                        // todo -- choose a first style if style is not chosen for the user.
-                        if (style && style.containerClassNames && Array.isArray(style.containerClassNames))
-                            view.className += " " + style.containerClassNames.join(" ");
-                        var styleElement = document.createElement('style');
-                        styleElement.appendChild(window.document.createTextNode(style.style));
-                        window.document.head.appendChild(styleElement);
-                    }
+                    // todo -- choose a first style if style is not chosen for the user.
+                    processAndApplyStyle(viewId, view, fetchedData, template, style);
                     if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
                         refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
                     }
@@ -16727,6 +16814,27 @@ function fetchAndRenderData() {
         });
     }
 }
+function processAndApplyStyle(viewId, view, fetchedData, template, style) {
+    if (!style)
+        return;
+    if (style.containerClassNames && Array.isArray(style.containerClassNames))
+        view.className += " " + style.containerClassNames.join(" ");
+    var styleElement = document.createElement('style');
+    var stylesMap = {};
+    var styleContent = style.style;
+    if (fetchedData.styleProperties) {
+        Object.keys(fetchedData.styleProperties).forEach(function (property) {
+            var _a;
+            stylesMap[property] = fetchedData.styleProperties[property] ? fetchedData.styleProperties[property] : (_a = style.properties[property]) === null || _a === void 0 ? void 0 : _a.default;
+        });
+    }
+    Object.keys(stylesMap).forEach(function (key) {
+        var value = stylesMap[key];
+        styleContent = styleContent.replaceAll("{{" + key + "}}", value);
+    });
+    styleElement.appendChild(window.document.createTextNode(styleContent));
+    window.document.head.appendChild(styleElement);
+}
 function fetchAndRerenderData(viewId, view, page) {
     if (page === void 0) { page = 1; }
     if (window && window.document) {
@@ -16735,11 +16843,14 @@ function fetchAndRerenderData(viewId, view, page) {
             result.json().then(function (fetchedData) {
                 var template = getTemplate(fetchedData);
                 var style = getStyle(fetchedData);
-                view.innerHTML = ""; // clear out just the content and reload
                 var viewType = ViewType[fetchedData.type.valueOf()];
                 if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
                     refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
                 }
+                document.head.querySelectorAll('.' + viewId).forEach(function (a) {
+                    a.remove();
+                });
+                view.innerHTML = ""; // clear out just the content and reload
                 switch (viewType) {
                     case ViewType.Graph:
                         renderGraphToView(viewId, view, fetchedData, template, style);
@@ -16755,6 +16866,7 @@ function fetchAndRerenderData(viewId, view, page) {
                         renderMapToView(viewId, view, fetchedData, template, style);
                     // not yet implemented
                 }
+                loadAndEvaluateScript(viewId, view, fetchedData, template);
             });
         });
     }
@@ -16918,7 +17030,6 @@ function closeInfoWindows(infoWindows) {
     Object.values(infoWindows).forEach(function (infoWindow) { infoWindow.close(); });
 }
 function loadAndEvaluateScript(viewId, view, fetchedData, template, style) {
-    console.log("Checking scripts");
     if (template.pageContent[PageTypes.SCRIPT]) {
         var scriptContent_1 = template.pageContent[PageTypes.SCRIPT];
         var propertiesMap_1 = {};
@@ -16927,10 +17038,20 @@ function loadAndEvaluateScript(viewId, view, fetchedData, template, style) {
             var value = propertiesMap_1[key];
             scriptContent_1 = scriptContent_1.replaceAll("{{" + key + "}}", value);
         });
-        var newScript = window.document.createElement("script");
-        newScript.innerHTML = scriptContent_1;
-        view.appendChild(newScript);
-        eval(scriptContent_1);
+        view.insertAdjacentHTML("beforeend", scriptContent_1);
+        var scripts = view.getElementsByTagName("script");
+        for (var i = 0; i < scripts.length; i++) {
+            var script = document.createElement("script");
+            script.className = viewId;
+            if (scripts[i].src) {
+                script.src = scripts[i].src;
+                script.async = scripts[i].async;
+            }
+            else {
+                script.innerText = scripts[i].innerText;
+            }
+            document.head.appendChild(script);
+        }
     }
 }
 function renderCollectionToView(viewId, view, fetchedData, template, style) {
@@ -16939,7 +17060,6 @@ function renderCollectionToView(viewId, view, fetchedData, template, style) {
         return;
     }
     // ignore the first row in data, since it is assumed to be a label row
-    console.log(fetchedData);
     if (template.pageContent[PageTypes.LIST]) {
         view.innerHTML += renderList(fetchedData, template);
         if (fetchedData.paginationStyle === PaginationStyle.Paged) {
@@ -16954,7 +17074,6 @@ function renderList(fetchedData, template) {
     var returning = "";
     var _loop_1 = function (i) {
         var currentRow = fetchedData.data[i];
-        console.log(currentRow);
         var templateMap = {};
         Object.keys(template.templateFields).forEach(function (field) {
             if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
@@ -17042,7 +17161,6 @@ function renderLanding(fetchedData, template) {
         }
         pageContent = pageContent.replaceAll("{{index}}", index);
         pageContent = pageContent.replaceAll("{{itemCount}}", featuredCount);
-        // console.log(pageContent);
         if (!renderedItems[category]) {
             renderedItems[category] = "";
         }
@@ -17052,7 +17170,6 @@ function renderLanding(fetchedData, template) {
     for (var i = 1; (index <= featuredCount) && (i < fetchedData.data.length); i++) {
         _loop_2(i);
     }
-    console.log(renderedItems);
     if (template.pageContent[PageTypes.ITEM]) {
         var detailPages_1 = "";
         Object.keys(renderedItems).forEach(function (category, index) {

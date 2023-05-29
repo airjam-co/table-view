@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
 import { ChartType } from "chart.js";
-import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes, TemplateProperty } from "@airjam/types";
+import { dataField, tableViewResponse, DataSourceFieldType, PaginationStyle, ViewType, template_cache, style_cache, PageTypes, TemplateProperty, TemplateStyle } from "@airjam/types";
 import {Loader, LoaderOptions} from "google-maps";
 
 const SERVING_DATA_URL: string = "https://airjam.co/s/data?id=";
@@ -24,13 +24,8 @@ export default function fetchAndRenderData() {
         result.json().then((fetchedData: tableViewResponse) => {
           const template = getTemplate(fetchedData);
           const style = getStyle(fetchedData);
-          if (style) {
-            // todo -- choose a first style if style is not chosen for the user.
-            if (style && style.containerClassNames && Array.isArray(style.containerClassNames)) view.className += " " + style.containerClassNames.join(" ");
-            const styleElement = document.createElement('style');
-            styleElement.appendChild(window.document.createTextNode(style.style));
-            window.document.head.appendChild(styleElement);
-          }
+          // todo -- choose a first style if style is not chosen for the user.
+          processAndApplyStyle(viewId, view, fetchedData, template, style);
           if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
             refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
           }
@@ -60,6 +55,25 @@ export default function fetchAndRenderData() {
   }
 }
 
+function processAndApplyStyle(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: TemplateStyle) {
+  if (!style) return;
+  if (style.containerClassNames && Array.isArray(style.containerClassNames)) view.className += " " + style.containerClassNames.join(" ");
+  const styleElement = document.createElement('style');
+  const stylesMap: {[id: string]: TemplateProperty} = {};
+  let styleContent: any = style.style;
+  if (fetchedData.styleProperties) {
+    Object.keys(fetchedData.styleProperties).forEach((property: any) => {
+      stylesMap[property] = fetchedData.styleProperties[property] ? fetchedData.styleProperties[property] : style.properties[property]?.default;
+    });
+  }
+  Object.keys(stylesMap).forEach((key: string) => {
+    const value = stylesMap[key];
+    styleContent = styleContent.replaceAll( "{{" + key + "}}", value);
+  });
+  styleElement.appendChild(window.document.createTextNode(styleContent));
+  window.document.head.appendChild(styleElement);
+}
+
 function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
   if (window && window.document) {
     currentPage[viewId] = page;
@@ -67,11 +81,14 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
       result.json().then((fetchedData: tableViewResponse) => {
         const template = getTemplate(fetchedData);
         const style = getStyle(fetchedData);
-        view.innerHTML = ""; // clear out just the content and reload
         const viewType = ViewType[fetchedData.type.valueOf() as keyof typeof ViewType];
         if (fetchedData.templateProperties && fetchedData.templateProperties.refreshInterval) {
           refreshInterval = Number(fetchedData.templateProperties.refreshInterval) * 1000; // convert seconds to milliseconds
         }
+        document.head.querySelectorAll('.' + viewId).forEach(function(a) {
+          a.remove();
+        })
+        view.innerHTML = ""; // clear out just the content and reload
         switch(viewType) {
           case ViewType.Graph:
             renderGraphToView(viewId, view, fetchedData, template, style);
@@ -88,6 +105,7 @@ function fetchAndRerenderData(viewId: string, view: Element, page: number = 1) {
           default:
             // not yet implemented
         }
+        loadAndEvaluateScript(viewId, view, fetchedData, template, style);
       });
     });
   }
@@ -260,7 +278,6 @@ function closeInfoWindows(infoWindows: {[index: number]: google.maps.InfoWindow}
 }
 
 function loadAndEvaluateScript(viewId: string, view: Element, fetchedData: tableViewResponse, template: any, style: any) {
-  console.log("Checking scripts");
   if (template.pageContent[PageTypes.SCRIPT]) {
     let scriptContent = template.pageContent[PageTypes.SCRIPT];
     const propertiesMap: {[id: string]: TemplateProperty} = {};
@@ -269,10 +286,19 @@ function loadAndEvaluateScript(viewId: string, view: Element, fetchedData: table
       const value = propertiesMap[key];
       scriptContent = scriptContent.replaceAll( "{{" + key + "}}", value);
     });
-    var newScript = window.document.createElement("script");
-    newScript.innerHTML = scriptContent;
-    view.appendChild(newScript);
-    eval(scriptContent);
+    view.insertAdjacentHTML("beforeend",scriptContent);
+    const scripts = view.getElementsByTagName("script");
+    for (let i = 0; i < scripts.length; i++) {
+      var script = document.createElement("script");
+      script.className = viewId;
+      if (scripts[i].src) {
+        script.src = scripts[i].src;
+        script.async = scripts[i].async;
+      } else {
+        script.innerText = scripts[i].innerText;
+      }
+      document.head.appendChild(script); 
+    }
   }
 }
 
@@ -282,7 +308,6 @@ function renderCollectionToView(viewId: string, view: Element, fetchedData: tabl
     return;
   }
   // ignore the first row in data, since it is assumed to be a label row
-  console.log(fetchedData);
   if (template.pageContent[PageTypes.LIST]) {
     view.innerHTML += renderList(fetchedData, template);
     if (fetchedData.paginationStyle === PaginationStyle.Paged) {
@@ -297,7 +322,6 @@ function renderList(fetchedData: tableViewResponse, template: any): string {
   let returning = "";
   for (let i = 1; i < fetchedData.data.length; i++) {
     const currentRow = fetchedData.data[i];
-    console.log(currentRow);
     const templateMap: {[id: string]: string} = {};
     Object.keys(template.templateFields).forEach((field: string) => {
       if (fetchedData.templateFields[field] && currentRow[fetchedData.templateFields[field]]) {
@@ -385,14 +409,12 @@ function renderLanding(fetchedData: tableViewResponse, template: any): string {
     }
     pageContent = pageContent.replaceAll( "{{index}}", index);
     pageContent = pageContent.replaceAll( "{{itemCount}}", featuredCount);
-    // console.log(pageContent);
     if (!renderedItems[category]) {
       renderedItems[category] = "";
     }
     renderedItems[category] += pageContent;
     index++;
   }
-  console.log(renderedItems);
   if (template.pageContent[PageTypes.ITEM]) {
     let detailPages: string = "";
     Object.keys(renderedItems).forEach((category: string, index: number) => {

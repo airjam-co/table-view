@@ -2,10 +2,8 @@
 # yarn lockfile v1
 
 
-"@airjam/types@0.0.82":
-  version "0.0.83"
-  resolved "https://registry.yarnpkg.com/@airjam/types/-/types-0.0.82.tgz#4526ce3f2517371db5a0997d76b1395497c1b990"
-  integrity sha512-5kXfLXOT5sBjvJWN0fBFKRuLdK7UkkPe4mGPzmbNYgutQ8xtto7K5Jtuo+BjVCl2t3nuyyJJciTIhQ02V+LtUw==
+"@airjam/types@../common-types/":
+  version "0.0.84"
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.1"
